@@ -7,11 +7,12 @@ import (
 	"gingorm/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	r := gin.Default()
-
+	godotenv.Load()
 	models.ConnectDataBase()
 	// r.GET("/books", controllers.FindBooks)
 	// r.POST("/books", controllers.CreateBook)
