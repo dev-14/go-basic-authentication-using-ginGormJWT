@@ -20,6 +20,17 @@ func PublicEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
 	r.POST("/login", authMiddleware.LoginHandler)
 }
 
+func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
+	// Generate Authenticated endpoints - [] - api/v1/auth/
+	r.Use(authMiddleware.MiddlewareFunc())
+
+	// r.POST("supervisor/create", controllers.CreateSupervisor)
+	// r.POST("admin/create", controllers.CreateAdmin)
+
+	//r.POST("product/create", controllers.CreateBook)
+
+}
+
 func GetRouter(router chan *gin.Engine) {
 	gin.ForceConsoleColor()
 	r := gin.Default()
@@ -31,6 +42,6 @@ func GetRouter(router chan *gin.Engine) {
 	// Create a BASE_URL - /api/v1
 	v1 := r.Group("/api/v1/")
 	PublicEndpoints(v1, authMiddleware)
-	//AuthenticatedEndpoints(v1.Group("auth"), authMiddleware)
+	AuthenticatedEndpoints(v1.Group("auth"), authMiddleware)
 	router <- r
 }

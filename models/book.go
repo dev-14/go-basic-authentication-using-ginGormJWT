@@ -1,11 +1,15 @@
 package models
 
-import (
-	_ "github.com/jinzhu/gorm"
-)
+import "time"
 
 type Book struct {
-	ID     uint   `json:"id" gorm:"primary_key"`
-	Title  string `json:"title"`
-	Author string `json:"author"`
+	ID         int    `json:"id,string"`
+	Title      string `json:"title" gorm:"unique"`
+	CreatedBy  int
+	User       User `gorm:"foreignKey:CreatedBy" json:"-"`
+	CategoryId int  `json:"category_id,string"`
+	Price      int  `json:"price"`
+	// Meta
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }

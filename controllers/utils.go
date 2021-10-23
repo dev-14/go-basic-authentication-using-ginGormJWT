@@ -1,18 +1,83 @@
 package controllers
 
 import (
+	"errors"
 	"gingorm/models"
-	//"errors"
+	"unicode"
+
 	"fmt"
 	"log"
 
-	//"unicode"
-
-	//jwt "github.com/appleboy/gin-jwt/v2"
-	//"github.com/gin-gonic/gin"
+	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+func IsPasswordStrong(password string) (bool, error) {
+	var IsLength, IsUpper, IsLower, IsNumber, IsSpecial bool
+
+	if len(password) < 6 {
+		return false, errors.New("Password Length should be more then 6")
+	}
+	IsLength = true
+
+	for _, v := range password {
+		switch {
+		case unicode.IsNumber(v):
+			IsNumber = true
+
+		case unicode.IsUpper(v):
+			IsUpper = true
+
+		case unicode.IsLower(v):
+			IsLower = true
+
+		case unicode.IsPunct(v) || unicode.IsSymbol(v):
+			IsSpecial = true
+
+		}
+	}
+
+	if IsLength && IsLower && IsUpper && IsNumber && IsSpecial {
+		return true, nil
+	}
+
+	return false, errors.New("Password validation failed.")
+
+}
+
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
+	if err != nil {
+		log.Fatal("Error in Hashing")
+		return "", err
+	}
+	return string(hashedPassword), err
+}
+
+// DoesUserExist is a helper function which checks if the user already exists in the user table or not.
+func DoesUserExist(email string) bool {
+	var users []models.User
+	err := models.DB.Where("email=?", email).First(&users).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false
+		}
+	}
+	return true
+}
+
+func DoesProductExist(ID int) bool {
+	var product []models.Book
+	err := models.DB.Where("id=?", ID).First(&product).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false
+		}
+	}
+	return true
+}
 
 func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 	// db := c.MustGet("db").(*gorm.DB)
@@ -39,4 +104,28 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 
 	}
 	return false
+}
+
+func IsAdmin(c *gin.Context) bool {
+	claims := jwt.ExtractClaims(c)
+	user_email, _ := claims["email"]
+	var User models.User
+
+	// Check if the current user had admin role.
+	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+		return false
+	}
+	return true
+}
+
+func IsSupervisor(c *gin.Context) bool {
+	claims := jwt.ExtractClaims(c)
+	user_email, _ := claims["email"]
+	var User models.User
+
+	// Check if the current user had admin role.
+	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
+		return false
+	}
+	return true
 }

@@ -1,0 +1,91 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    name: API Support
+  description: Golang basic API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Login System
+  version: "1.0"
+paths:
+  /api/v1/auth/admin/create:
+    post:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of Supervisor or
+        Admin.
+      parameters:
+      - in: formData
+        name: email
+        required: true
+        type: string
+      - in: formData
+        name: firstname
+        required: true
+        type: string
+      - in: formData
+        name: lastname
+        required: true
+        type: string
+      - in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: CreateAdmin endpoint is used by the admin role user to create a new
+        admin or supervisor account.
+      tags:
+      - admin
+  /api/v1/auth/supervisor/create:
+    post:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of Supervisor or
+        Admin.
+      parameters:
+      - in: formData
+        name: email
+        required: true
+        type: string
+      - in: formData
+        name: firstname
+        required: true
+        type: string
+      - in: formData
+        name: lastname
+        required: true
+        type: string
+      - in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: CreateSupervisor endpoint is used by the admin role user to create
+        a new admin or supervisor account.
+      tags:
+      - supervisor
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of customer.
+      parameters:
+      - in: formData
+        name: email
+        required: true
+        type: string
+      - in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: Login endpoint is used by the user to login.
+      tags:
+      - auth
+swagger: "2.0"
