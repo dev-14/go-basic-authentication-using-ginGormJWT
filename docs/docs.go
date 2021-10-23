@@ -42,33 +42,7 @@ var doc = `{
                 "tags": [
                     "admin"
                 ],
-                "summary": "CreateAdmin endpoint is used by the admin role user to create a new admin or supervisor account.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "firstname",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "lastname",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    }
-                ]
+                "summary": "CreateAdmin endpoint is used by the admin role user to create a new admin or supervisor account."
             }
         },
         "/api/v1/auth/supervisor/create": {
@@ -83,33 +57,7 @@ var doc = `{
                 "tags": [
                     "supervisor"
                 ],
-                "summary": "CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "firstname",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "lastname",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    }
-                ]
+                "summary": "CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account."
             }
         },
         "/api/v1/login": {
@@ -124,21 +72,7 @@ var doc = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login endpoint is used by the user to login.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    }
-                ]
+                "summary": "Login endpoint is used by the user to login."
             }
         }
     }

@@ -6,11 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	// "github.com/dgrijalva/jwt-go"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	//"github.com/gofiber/fiber/v2"
-	//"github.com/gofiber/fiber"
 )
 
 const SecretKey = "secret"
@@ -21,11 +18,6 @@ const SecretKey = "secret"
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param email formData string true "Email of the user"
-// @Param first_name formData string true "First name of the user"
-// @Param last_name formData string true "Last name of the user"
-// @Param password formData string true "Password of the user"
-// @Param confirm_password formData string true "Confirm password."
 type RegisterNew struct {
 	FirstName string `json:"firstname" binding:"required"`
 	LastName  string `json:"lastname" binding:"required"`
@@ -96,7 +88,6 @@ type login struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param login formData login true "Credentials of the user"
 func Login(c *gin.Context) (interface{}, error) {
 	var loginVals login
 	// var User User
@@ -127,7 +118,6 @@ func Login(c *gin.Context) (interface{}, error) {
 // @Tags supervisor
 // @Accept json
 // @Produce json
-// @Param login formData RegisterNew true "Info of the user"
 func CreateSupervisor(c *gin.Context) {
 	if !IsAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -215,7 +205,6 @@ func CreateSupervisor(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Param login formData RegisterNew true "Info of the user"
 func CreateAdmin(c *gin.Context) {
 
 	if !IsAdmin(c) {

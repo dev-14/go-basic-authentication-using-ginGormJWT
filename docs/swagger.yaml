@@ -17,23 +17,6 @@ paths:
       - application/json
       description: API Endpoint to register the user with the role of Supervisor or
         Admin.
-      parameters:
-      - in: formData
-        name: email
-        required: true
-        type: string
-      - in: formData
-        name: firstname
-        required: true
-        type: string
-      - in: formData
-        name: lastname
-        required: true
-        type: string
-      - in: formData
-        name: password
-        required: true
-        type: string
       produces:
       - application/json
       summary: CreateAdmin endpoint is used by the admin role user to create a new
@@ -46,23 +29,6 @@ paths:
       - application/json
       description: API Endpoint to register the user with the role of Supervisor or
         Admin.
-      parameters:
-      - in: formData
-        name: email
-        required: true
-        type: string
-      - in: formData
-        name: firstname
-        required: true
-        type: string
-      - in: formData
-        name: lastname
-        required: true
-        type: string
-      - in: formData
-        name: password
-        required: true
-        type: string
       produces:
       - application/json
       summary: CreateSupervisor endpoint is used by the admin role user to create
@@ -74,15 +40,6 @@ paths:
       consumes:
       - application/json
       description: API Endpoint to register the user with the role of customer.
-      parameters:
-      - in: formData
-        name: email
-        required: true
-        type: string
-      - in: formData
-        name: password
-        required: true
-        type: string
       produces:
       - application/json
       summary: Login endpoint is used by the user to login.
