@@ -3,11 +3,11 @@ package models
 import "time"
 
 type Category struct {
-	ID        int    `json:"id,string"`
-	Title     string `json:"title" gorm:"unique"`
-	CreatedBy int
-	User      User `gorm:"foreignKey:CreatedBy" json:"-"`
+	ID           int    `json:"id,string"`
+	CategoryName string `json:"category_name" gorm:"unique"`
+	CreatedBy    int
+	User         User `gorm:"foreignKey:CreatedBy" json:"-"`
 	// Meta
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }

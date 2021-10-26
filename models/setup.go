@@ -102,9 +102,23 @@ func ConnectDataBase() {
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
+	fmt.Println("Migrating tables")
 
+	//tried migrating using interface
+	// var models = []interface{}{&User{}, &UserRole{}, &Book{}, &Category{}}
+	// connection.AutoMigrate(models...)
+
+	//normal migration
+	err = connection.AutoMigrate(&UserRole{}, &User{}, &Book{}, &Category{})
+	if err != nil {
+		fmt.Println("error is: ", err)
+	}
+	fmt.Println("Done migrating")
+
+	//DB.Migrator().CreateTable(&Category{})
 	DB = connection
-	connection.AutoMigrate(&Book{})
-	connection.AutoMigrate(&User{})
+	fmt.Println("Done migrating")
+	//connection.AutoMigrate(&User{})
+
 	createInitialData()
 }

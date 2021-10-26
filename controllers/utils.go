@@ -107,7 +107,9 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 }
 
 func IsAdmin(c *gin.Context) bool {
+	//token := c.GetHeader("token")
 	claims := jwt.ExtractClaims(c)
+	fmt.Println(claims)
 	user_email, _ := claims["email"]
 	var User models.User
 

@@ -3,10 +3,12 @@ package controllers
 import (
 	"fmt"
 	"gingorm/models"
+	"html/template"
 	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
+	//"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,19 +20,45 @@ const SecretKey = "secret"
 // @Tags auth
 // @Accept json
 // @Produce json
-type RegisterNew struct {
-	FirstName string `json:"firstname" binding:"required"`
-	LastName  string `json:"lastname" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+type tempUser struct {
+	FirstName       string `json:"first_name" binding:"required"`
+	LastName        string `json:"last_name" binding:"required"`
+	Email           string `json:"email" binding:"required"`
+	Password        string `json:"password" binding:"required"`
+	ConfirmPassword string `json:"confirmpassword" binding:"required"`
+}
+
+func ReturnParameterMissingError(c *gin.Context, parameter string) {
+	var err = fmt.Sprintf("Required parameter %s missing.", parameter)
+	c.JSON(http.StatusBadRequest, gin.H{"error": err})
 }
 
 func Register(c *gin.Context) {
-	var tempUser RegisterNew
+	var tempUser tempUser
 	var Role models.UserRole
-	if err := c.ShouldBindJSON(&tempUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+
+	c.Request.ParseForm()
+	paramList := []string{"email", "first_name", "last_name", "password", "confirmpassword"}
+
+	for _, param := range paramList {
+		if c.PostForm(param) == "" {
+			ReturnParameterMissingError(c, param)
+		}
+	}
+
+	// if err := c.ShouldBindJSON(&tempUser); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	tempUser.Email = template.HTMLEscapeString(c.PostForm("email"))
+	tempUser.FirstName = template.HTMLEscapeString(c.PostForm("first_name"))
+	tempUser.LastName = template.HTMLEscapeString(c.PostForm("last_name"))
+	tempUser.Password = template.HTMLEscapeString(c.PostForm("password"))
+	tempUser.ConfirmPassword = template.HTMLEscapeString(c.PostForm("confirmpassword"))
+
+	if tempUser.Password != tempUser.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Both passwords do not match."})
 	}
 
 	ispasswordstrong, _ := IsPasswordStrong(tempUser.Password)
@@ -111,6 +139,58 @@ func Login(c *gin.Context) (interface{}, error) {
 	return nil, jwt.ErrFailedAuthentication
 }
 
+// func Login(c *gin.Context) {
+// 	var data map[string]string
+
+// 	err := c.ShouldBindJSON(&data)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{
+// 			"error": err,
+// 		})
+// 	}
+
+// 	var user models.User
+
+// 	models.DB.Where("email=?", data["email"]).First(&user)
+// 	if user.ID == 0 {
+// 		c.JSON(http.StatusNotFound, gin.H{
+// 			"message": "user not found",
+// 		})
+// 	} else if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"])); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"message": "wrong password",
+// 		})
+// 	} else {
+// 		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+// 			Issuer:    strconv.Itoa(int(user.ID)),
+// 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+// 		})
+
+// 		token, err := claims.SignedString([]byte(SecretKey))
+
+// 		if err != nil {
+// 			c.JSON(http.StatusInternalServerError, gin.H{
+// 				"message": "could not login",
+// 			})
+// 		}
+// 		// _ = token
+
+// 		// c.SetCookie("jwt", token, 60*60*24, "", "", true, true)
+// 		// http.SetCookie(c.Writer, &http.Cookie{
+// 		// 	Name:    user.FirstName,
+// 		// 	Value:   token,
+// 		// 	Expires: time.Now().Add(time.Hour * 24),
+// 		// })
+// 		c.Header("token", token)
+
+// 		c.JSON(http.StatusOK, gin.H{
+// 			"message": "successfully logged in",
+// 			"token":   token,
+// 		})
+// 	}
+
+// }
+
 // CreateSupervisorOrAdmin godoc
 // @Summary CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account.
 // @Description API Endpoint to register the user with the role of Supervisor or Admin.
@@ -118,47 +198,43 @@ func Login(c *gin.Context) (interface{}, error) {
 // @Tags supervisor
 // @Accept json
 // @Produce json
+// @Param login formData TempUser true "Info of the user"
 func CreateSupervisor(c *gin.Context) {
+	fmt.Println("supervisor api hit")
 	if !IsAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 	}
 
 	// Create a user with the role of supervisor.
-	var tempUser RegisterNew
+	var tempUser tempUser
 	var Role models.UserRole
 
-	//c.Request.ParseForm()
-	// paramList := []string{"email", "first_name", "last_name", "password", "confirm_password"}
+	c.Request.ParseForm()
+	paramList := []string{"first_name", "last_name", "email", "password", "confirmpassword"}
 
-	// for _, param := range paramList {
-	// 	if c.PostForm(param) == "" {
-	// 		ReturnParameterMissingError(c, param)
-	// 	}
-	// }
-
-	if err := c.ShouldBindJSON(&tempUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	for _, param := range paramList {
+		if c.PostForm(param) == "" {
+			ReturnParameterMissingError(c, param)
+		}
 	}
 
-	// tempUser.Email = template.HTMLEscapeString(c.PostForm("email"))
-	// tempUser.FirstName = template.HTMLEscapeString(c.PostForm("first_name"))
-	// tempUser.LastName = template.HTMLEscapeString(c.PostForm("last_name"))
-	// tempUser.Password = template.HTMLEscapeString(c.PostForm("password"))
-	// tempUser.ConfirmPassword = template.HTMLEscapeString(c.PostForm("confirm_password"))
+	tempUser.Email = template.HTMLEscapeString(c.PostForm("email"))
+	tempUser.FirstName = template.HTMLEscapeString(c.PostForm("first_name"))
+	tempUser.LastName = template.HTMLEscapeString(c.PostForm("last_name"))
+	tempUser.Password = template.HTMLEscapeString(c.PostForm("password"))
+	tempUser.ConfirmPassword = template.HTMLEscapeString(c.PostForm("confirmpassword"))
 
-	// Check if both passwords are same.
-	// if tempUser.Password != tempUser.ConfirmPassword {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Both passwords do not match."})
-	// }
-
-	// check if the password is strong and matches the password policy
-	// length > 8, atleast 1 upper case, atleast 1 lower case, atleast 1 symbol
-	//ispasswordstrong, _ := IsPasswordStrong(tempUser.Password)
+	//check if the password is strong and matches the password policy
+	//length > 8, atleast 1 upper case, atleast 1 lower case, atleast 1 symbol
+	// ispasswordstrong, _ := IsPasswordStrong(tempUser.Password)
 	// if ispasswordstrong == false {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Password is not strong."})
 	// 	return
 	// }
+
+	if tempUser.Password != tempUser.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Both passwords do not match."})
+	}
 
 	// Check if the user already exists.
 	if DoesUserExist(tempUser.Email) {
@@ -205,42 +281,46 @@ func CreateSupervisor(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
+// @Param login formData TempUser true "Info of the user"
 func CreateAdmin(c *gin.Context) {
 
 	if !IsAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 	}
 	// Create a user with the role of supervisor.
-	var tempUser RegisterNew
+	var tempUser tempUser
 	var Role models.UserRole
 
-	//c.Request.ParseForm()
-	//paramList := []string{"email", "first_name", "last_name", "password", "confirm_password"}
+	c.Request.ParseForm()
+	paramList := []string{"first_name", "last_name", "email", "password", "confirmpassword"}
 
-	// for _, param := range paramList {
-	// 	if c.PostForm(param) == "" {
-	// 		ReturnParameterMissingError(c, param)
-	// 	}
-	// }
+	for _, param := range paramList {
+		if c.PostForm(param) == "" {
+			ReturnParameterMissingError(c, param)
+		}
+	}
 
-	// tempUser.Email = template.HTMLEscapeString(c.PostForm("email"))
-	// tempUser.FirstName = template.HTMLEscapeString(c.PostForm("first_name"))
-	// tempUser.LastName = template.HTMLEscapeString(c.PostForm("last_name"))
-	// tempUser.Password = template.HTMLEscapeString(c.PostForm("password"))
-	// tempUser.ConfirmPassword = template.HTMLEscapeString(c.PostForm("confirm_password"))
+	tempUser.Email = template.HTMLEscapeString(c.PostForm("email"))
+	tempUser.FirstName = template.HTMLEscapeString(c.PostForm("first_name"))
+	tempUser.LastName = template.HTMLEscapeString(c.PostForm("last_name"))
+	tempUser.Password = template.HTMLEscapeString(c.PostForm("password"))
+	tempUser.ConfirmPassword = template.HTMLEscapeString(c.PostForm("confirmpassword"))
 
-	// Check if both passwords are same.
-	// if tempUser.Password != tempUser.ConfirmPassword {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Both passwords do not match."})
-	// }
+	fmt.Println("debug start")
+	fmt.Println(tempUser.FirstName, tempUser.LastName, tempUser.Password)
+	fmt.Println("debug end")
+
+	if tempUser.Password != tempUser.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Both passwords do not match."})
+	}
 
 	// check if the password is strong and matches the password policy
 	// length > 8, atleast 1 upper case, atleast 1 lower case, atleast 1 symbol
-	ispasswordstrong, _ := IsPasswordStrong(tempUser.Password)
-	if ispasswordstrong == false {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Password is not strong."})
-		return
-	}
+	// ispasswordstrong, _ := IsPasswordStrong(tempUser.Password)
+	// if ispasswordstrong == false {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Password is not strong."})
+	// 	return
+	// }
 
 	// Check if the user already exists.
 	if DoesUserExist(tempUser.Email) {

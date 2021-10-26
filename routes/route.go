@@ -24,10 +24,16 @@ func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 	// Generate Authenticated endpoints - [] - api/v1/auth/
 	r.Use(authMiddleware.MiddlewareFunc())
 
-	// r.POST("supervisor/create", controllers.CreateSupervisor)
-	// r.POST("admin/create", controllers.CreateAdmin)
+	r.POST("supervisor/create", controllers.CreateSupervisor)
+	r.POST("admin/create", controllers.CreateAdmin)
 
-	//r.POST("product/create", controllers.CreateBook)
+	r.POST("book/create", controllers.CreateBook)
+
+	//category endpoints
+	r.GET("category/", controllers.ListAllCategories)
+	r.POST("category/create", controllers.CreateCategory)
+	r.PATCH("category/:id", controllers.UpdateCategory)
+	r.GET("category/:id", controllers.GetCategory)
 
 }
 
