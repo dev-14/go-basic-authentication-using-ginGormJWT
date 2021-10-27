@@ -3,16 +3,12 @@ package controllers
 import (
 	"gingorm/models"
 	"html/template"
-	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // CreateBook godoc
@@ -162,40 +158,20 @@ func GetBook(c *gin.Context) {
 // @Tags book
 // @Accept json
 // @Produce json
-func ListAllProduct(c *gin.Context) {
+func ListAllBook(c *gin.Context) {
 
 	// allProduct := []models.Product{}
 	claims := jwt.ExtractClaims(c)
 	user_email, _ := claims["email"]
 	var User models.User
-	var Product []models.Book
+	var Book []models.Book
 	var existingBook []ReturnedBook
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	models.DB.Model(Product).Find(&existingBook)
+	models.DB.Model(Book).Find(&existingBook)
 	c.JSON(http.StatusOK, existingBook)
 	return
-}
-
-func generateFilePath(id string, extension string) string {
-	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
-	newFileName := uuid.New().String() + extension
-
-	projectFolder, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	localS3Folder := projectFolder + "/locals3/"
-	productImageFolder := localS3Folder + id + "/"
-
-	if _, err := os.Stat(productImageFolder); os.IsNotExist(err) {
-		os.Mkdir(productImageFolder, os.ModeDir)
-	}
-
-	imagePath := productImageFolder + newFileName
-	return imagePath
 }
