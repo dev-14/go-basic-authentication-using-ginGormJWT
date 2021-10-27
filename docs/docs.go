@@ -176,7 +176,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "book"
+                    "category"
                 ],
                 "summary": "GetCategory endpoint is used to get info of a category.."
             },
@@ -189,7 +189,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "book"
+                    "category"
                 ],
                 "summary": "UpdateCategory endpoint is used to get info of a category.."
             }

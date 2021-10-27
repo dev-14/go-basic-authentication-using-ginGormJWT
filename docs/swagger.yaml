@@ -118,7 +118,7 @@ paths:
       - application/json
       summary: GetCategory endpoint is used to get info of a category..
       tags:
-      - book
+      - category
     put:
       consumes:
       - application/json
@@ -127,7 +127,7 @@ paths:
       - application/json
       summary: UpdateCategory endpoint is used to get info of a category..
       tags:
-      - book
+      - category
   /api/v1/auth/category/create:
     post:
       consumes:
