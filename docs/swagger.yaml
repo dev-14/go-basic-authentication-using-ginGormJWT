@@ -17,18 +17,160 @@ paths:
       - application/json
       description: API Endpoint to register the user with the role of Supervisor or
         Admin.
+      parameters:
+      - in: formData
+        name: confirmpassword
+        required: true
+        type: string
+      - in: formData
+        name: email
+        required: true
+        type: string
+      - in: formData
+        name: first_name
+        required: true
+        type: string
+      - in: formData
+        name: last_name
+        required: true
+        type: string
+      - in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       summary: CreateAdmin endpoint is used by the admin role user to create a new
         admin or supervisor account.
       tags:
       - admin
+  /api/v1/auth/books/:
+    get:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of Supervisor or
+        Admin.
+      produces:
+      - application/json
+      summary: ListAllBook endpoint is used to list all book.
+      tags:
+      - book
+  /api/v1/auth/books/:id/:
+    get:
+      consumes:
+      - application/json
+      description: GetBook endpoint is used to get info of a book.
+      produces:
+      - application/json
+      summary: GetBook endpoint is used to get info of a book..
+      tags:
+      - book
+    patch:
+      consumes:
+      - application/json
+      description: Updatebook endpoint is used by the supervisor role user to update
+        a new book
+      produces:
+      - application/json
+      summary: UpdateBook endpoint is used by the supervisor role user to update a
+        new book.
+      tags:
+      - book
+  /api/v1/auth/books/create:
+    post:
+      consumes:
+      - application/json
+      description: CreateBook endpoint is used by the supervisor role user to create
+        a new book
+      parameters:
+      - description: name of the book
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: category_id of the book
+        in: formData
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: CreateBook endpoint is used by the supervisor role user to create a
+        new book.
+      tags:
+      - book
+  /api/v1/auth/category/:
+    get:
+      consumes:
+      - application/json
+      description: ListAllCategories endpoint is used to list all the categories.
+      produces:
+      - application/json
+      summary: ListAllCategories endpoint is used to list all the categories.
+      tags:
+      - category
+  /api/v1/auth/category/:id/:
+    get:
+      consumes:
+      - application/json
+      description: GetCategory endpoint is used to get info of a category.
+      produces:
+      - application/json
+      summary: GetCategory endpoint is used to get info of a category..
+      tags:
+      - book
+    put:
+      consumes:
+      - application/json
+      description: UpdateCategory endpoint is used to get info of a category.
+      produces:
+      - application/json
+      summary: UpdateCategory endpoint is used to get info of a category..
+      tags:
+      - book
+  /api/v1/auth/category/create:
+    post:
+      consumes:
+      - application/json
+      description: CreateCategory endpoint is used by admin to create category.
+      parameters:
+      - description: name of the category
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: CreateCategory endpoint is used by admin to create category.
+      tags:
+      - category
   /api/v1/auth/supervisor/create:
     post:
       consumes:
       - application/json
       description: API Endpoint to register the user with the role of Supervisor or
         Admin.
+      parameters:
+      - in: formData
+        name: confirmpassword
+        required: true
+        type: string
+      - in: formData
+        name: email
+        required: true
+        type: string
+      - in: formData
+        name: first_name
+        required: true
+        type: string
+      - in: formData
+        name: last_name
+        required: true
+        type: string
+      - in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       summary: CreateSupervisor endpoint is used by the admin role user to create
@@ -43,6 +185,17 @@ paths:
       produces:
       - application/json
       summary: Login endpoint is used by the user to login.
+      tags:
+      - auth
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of customer.
+      produces:
+      - application/json
+      summary: register endpoint is used for customer registration. ( Supervisors/admin
+        can be added only by admin. )
       tags:
       - auth
 swagger: "2.0"

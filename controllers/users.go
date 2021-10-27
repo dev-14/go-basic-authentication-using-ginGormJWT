@@ -14,12 +14,6 @@ import (
 
 const SecretKey = "secret"
 
-// @Summary register endpoint is used for customer registration. ( Supervisors/admin can be added only by admin. )
-// @Description API Endpoint to register the user with the role of customer.
-// @Router /api/v1/register [post]
-// @Tags auth
-// @Accept json
-// @Produce json
 type tempUser struct {
 	FirstName       string `json:"first_name" binding:"required"`
 	LastName        string `json:"last_name" binding:"required"`
@@ -33,6 +27,12 @@ func ReturnParameterMissingError(c *gin.Context, parameter string) {
 	c.JSON(http.StatusBadRequest, gin.H{"error": err})
 }
 
+// @Summary register endpoint is used for customer registration. ( Supervisors/admin can be added only by admin. )
+// @Description API Endpoint to register the user with the role of customer.
+// @Router /api/v1/register [post]
+// @Tags auth
+// @Accept json
+// @Produce json
 func Register(c *gin.Context) {
 	var tempUser tempUser
 	var Role models.UserRole
@@ -109,7 +109,7 @@ type login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-// Signin godoc
+// Login godoc
 // @Summary Login endpoint is used by the user to login.
 // @Description API Endpoint to register the user with the role of customer.
 // @Router /api/v1/login [post]
@@ -139,66 +139,14 @@ func Login(c *gin.Context) (interface{}, error) {
 	return nil, jwt.ErrFailedAuthentication
 }
 
-// func Login(c *gin.Context) {
-// 	var data map[string]string
-
-// 	err := c.ShouldBindJSON(&data)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{
-// 			"error": err,
-// 		})
-// 	}
-
-// 	var user models.User
-
-// 	models.DB.Where("email=?", data["email"]).First(&user)
-// 	if user.ID == 0 {
-// 		c.JSON(http.StatusNotFound, gin.H{
-// 			"message": "user not found",
-// 		})
-// 	} else if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"])); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{
-// 			"message": "wrong password",
-// 		})
-// 	} else {
-// 		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-// 			Issuer:    strconv.Itoa(int(user.ID)),
-// 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-// 		})
-
-// 		token, err := claims.SignedString([]byte(SecretKey))
-
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{
-// 				"message": "could not login",
-// 			})
-// 		}
-// 		// _ = token
-
-// 		// c.SetCookie("jwt", token, 60*60*24, "", "", true, true)
-// 		// http.SetCookie(c.Writer, &http.Cookie{
-// 		// 	Name:    user.FirstName,
-// 		// 	Value:   token,
-// 		// 	Expires: time.Now().Add(time.Hour * 24),
-// 		// })
-// 		c.Header("token", token)
-
-// 		c.JSON(http.StatusOK, gin.H{
-// 			"message": "successfully logged in",
-// 			"token":   token,
-// 		})
-// 	}
-
-// }
-
-// CreateSupervisorOrAdmin godoc
+// CreateSupervisor godoc
 // @Summary CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account.
 // @Description API Endpoint to register the user with the role of Supervisor or Admin.
 // @Router /api/v1/auth/supervisor/create [post]
 // @Tags supervisor
 // @Accept json
 // @Produce json
-// @Param login formData TempUser true "Info of the user"
+// @Param login formData tempUser true "Info of the user"
 func CreateSupervisor(c *gin.Context) {
 	fmt.Println("supervisor api hit")
 	if !IsAdmin(c) {
@@ -281,7 +229,7 @@ func CreateSupervisor(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Param login formData TempUser true "Info of the user"
+// @Param login formData tempUser true "Info of the user"
 func CreateAdmin(c *gin.Context) {
 
 	if !IsAdmin(c) {

@@ -14,10 +14,12 @@ import (
 // CreateBook godoc
 // @Summary CreateBook endpoint is used by the supervisor role user to create a new book.
 // @Description CreateBook endpoint is used by the supervisor role user to create a new book
-// @Router /api/v1/auth/product/create [post]
-// @Tags product
+// @Router /api/v1/auth/books/create [post]
+// @Tags book
 // @Accept json
 // @Produce json
+// @Param name formData string true "name of the book"
+// @Param category_id formData string true "category_id of the book"
 func CreateBook(c *gin.Context) {
 
 	var existingBook models.Book
@@ -90,7 +92,7 @@ func CreateBook(c *gin.Context) {
 // UpdateBook godoc
 // @Summary UpdateBook endpoint is used by the supervisor role user to update a new book.
 // @Description Updatebook endpoint is used by the supervisor role user to update a new book
-// @Router /api/v1/auth/product/:id/ [PATCH]
+// @Router /api/v1/auth/books/:id/ [PATCH]
 // @Tags book
 // @Accept json
 // @Produce json
@@ -132,8 +134,8 @@ type ReturnedBook struct {
 // GetBook godoc
 // @Summary GetBook endpoint is used to get info of a book..
 // @Description GetBook endpoint is used to get info of a book.
-// @Router /api/v1/auth/product/:id/ [get]
-// @Tags product
+// @Router /api/v1/auth/books/:id/ [get]
+// @Tags book
 // @Accept json
 // @Produce json
 func GetBook(c *gin.Context) {
@@ -154,7 +156,7 @@ func GetBook(c *gin.Context) {
 // ListAllBook godoc
 // @Summary ListAllBook endpoint is used to list all book.
 // @Description API Endpoint to register the user with the role of Supervisor or Admin.
-// @Router /api/v1/auth/book/ [get]
+// @Router /api/v1/auth/books/ [get]
 // @Tags book
 // @Accept json
 // @Produce json

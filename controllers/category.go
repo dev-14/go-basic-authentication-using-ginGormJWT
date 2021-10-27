@@ -13,7 +13,7 @@ import (
 
 // CreateCategory godoc
 // @Summary CreateCategory endpoint is used by admin to create category.
-// @Description API Endpoint to register the user with the role of Supervisor or Admin.
+// @Description CreateCategory endpoint is used by admin to create category.
 // @Router /api/v1/auth/category/create [post]
 // @Tags category
 // @Accept json
@@ -73,7 +73,7 @@ type ReturnedCategory struct {
 
 // ListAllCategories godoc
 // @Summary ListAllCategories endpoint is used to list all the categories.
-// @Description API Endpoint to register the user with the role of Supervisor or Admin.
+// @Description ListAllCategories endpoint is used to list all the categories.
 // @Router /api/v1/auth/category/ [get]
 // @Tags category
 // @Accept json
@@ -100,7 +100,7 @@ func ListAllCategories(c *gin.Context) {
 // @Summary GetCategory endpoint is used to get info of a category..
 // @Description GetCategory endpoint is used to get info of a category.
 // @Router /api/v1/auth/category/:id/ [get]
-// @Tags product
+// @Tags book
 // @Accept json
 // @Produce json
 func GetCategory(c *gin.Context) {
@@ -118,17 +118,24 @@ func GetCategory(c *gin.Context) {
 	return
 }
 
-// GetCategory godoc
-// @Summary UpdateCatagory endpoint is used to get info of a category..
-// @Description UpdateCatagory endpoint is used to get info of a category.
+// UpdateCategory godoc
+// @Summary UpdateCategory endpoint is used to get info of a category..
+// @Description UpdateCategory endpoint is used to get info of a category.
 // @Router /api/v1/auth/category/:id/ [PUT]
-// @Tags product
+// @Tags book
 // @Accept json
 // @Produce json
 func UpdateCategory(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	user_email, _ := claims["email"]
+	var User models.User
 	var existingCategory models.Category
 	var UpdateCategory models.Category
 
+	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
+		return
+	}
 	// Check if the product already exists.
 	err := models.DB.Where("id = ?", c.Param("id")).First(&existingCategory).Error
 	if err != nil {

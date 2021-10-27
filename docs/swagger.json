@@ -28,7 +28,180 @@
                 "tags": [
                     "admin"
                 ],
-                "summary": "CreateAdmin endpoint is used by the admin role user to create a new admin or supervisor account."
+                "summary": "CreateAdmin endpoint is used by the admin role user to create a new admin or supervisor account.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "confirmpassword",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "first_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "last_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/books/": {
+            "get": {
+                "description": "API Endpoint to register the user with the role of Supervisor or Admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "ListAllBook endpoint is used to list all book."
+            }
+        },
+        "/api/v1/auth/books/:id/": {
+            "get": {
+                "description": "GetBook endpoint is used to get info of a book.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "GetBook endpoint is used to get info of a book.."
+            },
+            "patch": {
+                "description": "Updatebook endpoint is used by the supervisor role user to update a new book",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "UpdateBook endpoint is used by the supervisor role user to update a new book."
+            }
+        },
+        "/api/v1/auth/books/create": {
+            "post": {
+                "description": "CreateBook endpoint is used by the supervisor role user to create a new book",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "CreateBook endpoint is used by the supervisor role user to create a new book.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the book",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_id of the book",
+                        "name": "category_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/category/": {
+            "get": {
+                "description": "ListAllCategories endpoint is used to list all the categories.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "ListAllCategories endpoint is used to list all the categories."
+            }
+        },
+        "/api/v1/auth/category/:id/": {
+            "get": {
+                "description": "GetCategory endpoint is used to get info of a category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "GetCategory endpoint is used to get info of a category.."
+            },
+            "put": {
+                "description": "UpdateCategory endpoint is used to get info of a category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "UpdateCategory endpoint is used to get info of a category.."
+            }
+        },
+        "/api/v1/auth/category/create": {
+            "post": {
+                "description": "CreateCategory endpoint is used by admin to create category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "CreateCategory endpoint is used by admin to create category.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the category",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    }
+                ]
             }
         },
         "/api/v1/auth/supervisor/create": {
@@ -43,7 +216,39 @@
                 "tags": [
                     "supervisor"
                 ],
-                "summary": "CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account."
+                "summary": "CreateSupervisor endpoint is used by the admin role user to create a new admin or supervisor account.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "confirmpassword",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "first_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "last_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ]
             }
         },
         "/api/v1/login": {
@@ -59,6 +264,21 @@
                     "auth"
                 ],
                 "summary": "Login endpoint is used by the user to login."
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "description": "API Endpoint to register the user with the role of customer.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "register endpoint is used for customer registration. ( Supervisors/admin can be added only by admin. )"
             }
         }
     }
