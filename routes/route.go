@@ -18,6 +18,7 @@ func PublicEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
 	r.POST("/register", controllers.Register)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/logout", authMiddleware.LogoutHandler)
 }
 
 func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {

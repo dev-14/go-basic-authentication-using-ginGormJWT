@@ -136,6 +136,8 @@ func Login(c *gin.Context) (interface{}, error) {
 			Email: email,
 		}, nil
 	}
+	//token := jwt.GetToken(c)
+
 	return nil, jwt.ErrFailedAuthentication
 }
 
