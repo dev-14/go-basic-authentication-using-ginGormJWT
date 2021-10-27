@@ -100,7 +100,7 @@ func ListAllCategories(c *gin.Context) {
 // @Summary GetCategory endpoint is used to get info of a category..
 // @Description GetCategory endpoint is used to get info of a category.
 // @Router /api/v1/auth/category/:id/ [get]
-// @Tags book
+// @Tags category
 // @Accept json
 // @Produce json
 func GetCategory(c *gin.Context) {
@@ -122,7 +122,7 @@ func GetCategory(c *gin.Context) {
 // @Summary UpdateCategory endpoint is used to get info of a category..
 // @Description UpdateCategory endpoint is used to get info of a category.
 // @Router /api/v1/auth/category/:id/ [PUT]
-// @Tags book
+// @Tags category
 // @Accept json
 // @Produce json
 func UpdateCategory(c *gin.Context) {
