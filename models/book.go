@@ -13,3 +13,13 @@ type Book struct {
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 }
+
+type BookImage struct {
+	ID     int    `json:"id,string"`
+	URL    string `json:"uri"`
+	BookId int
+	Book   Book `gorm:"foreignKey:BookId"`
+
+	// META
+	CreatedAt time.Time
+}

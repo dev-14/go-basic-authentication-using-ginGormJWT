@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"gingorm/models"
 	"html/template"
 	"net/http"
@@ -31,16 +30,18 @@ func CreateCategory(c *gin.Context) {
 	}
 
 	c.Request.ParseForm()
-
+	var flag bool
 	if c.PostForm("name") == "" {
 		ReturnParameterMissingError(c, "name")
+		flag = true
 	}
-
 	category_title := template.HTMLEscapeString(c.PostForm("name"))
-	fmt.Println(category_title)
-	fmt.Println("category printed")
+	// fmt.Println(category_title)
+	// fmt.Println("category printed")
 	// Check if the category already exists.
-
+	if flag == true {
+		return
+	}
 	err := models.DB.Where("title = ?", category_title).First(&existingCategory).Error
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "category already exists."})

@@ -3,12 +3,17 @@ package controllers
 import (
 	"gingorm/models"
 	"html/template"
+	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateBook godoc
@@ -176,4 +181,116 @@ func ListAllBook(c *gin.Context) {
 	models.DB.Model(Book).Find(&existingBook)
 	c.JSON(http.StatusOK, existingBook)
 	return
+}
+
+type UploadedFile struct {
+	Status   bool
+	BookId   int
+	Filename string
+	Path     string
+	Err      string
+}
+
+func generateFilePath(id string, extension string) string {
+	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
+	newFileName := uuid.New().String() + extension
+
+	projectFolder, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	localS3Folder := projectFolder + "/locals3/"
+	imageFolder := localS3Folder + id + "/"
+
+	if _, err := os.Stat(imageFolder); os.IsNotExist(err) {
+		os.Mkdir(imageFolder, os.ModeDir)
+	}
+
+	imagePath := imageFolder + newFileName
+	return imagePath
+}
+
+func SaveToBucket(c *gin.Context, f *multipart.FileHeader, extension string, filename string) UploadedFile {
+	/*
+		whitelist doctionary for extensions
+		golang doesnot support "for i in x" construct like python,
+		Iterating the list would be expensive, thus we need to use a struct to prevent for loop.
+	*/
+	acceptedExtensions := map[string]bool{
+		".png":  true,
+		".jpg":  true,
+		".JPEG": true,
+		".PNG":  true,
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if !acceptedExtensions[extension] {
+		return UploadedFile{Status: false, BookId: id, Filename: filename, Err: "Invalid Extension"}
+	}
+
+	filePath := generateFilePath(c.Param("id"), extension)
+	err := c.SaveUploadedFile(f, filePath)
+
+	if err == nil {
+		return UploadedFile{
+			Status:   true,
+			BookId:   id,
+			Filename: filename,
+			Path:     filePath,
+			Err:      "",
+		}
+	}
+	return UploadedFile{Status: false, BookId: id, Filename: filename, Err: ""}
+}
+
+// UploadProductImages godoc
+// @Summary UploadProductImages endpoint is used to add images to product.
+// @Description API Endpoint to register the user with the role of Supervisor or Admin.
+// @Router /api/v1/auth/product/:id/image/upload [post]
+// @Tags product
+// @Accept json
+// @Produce json
+func UploadBookImages(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if !IsSupervisor(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Product Image can only be added by supervisor"})
+		return
+	}
+
+	if !DoesProductExist(id) {
+		c.JSON(http.StatusNotFound, "Product does not exist")
+		return
+	}
+
+	form, _ := c.MultipartForm()
+	files := form.File["file"]
+
+	var SuccessfullyUploadedFiles []UploadedFile
+	var UnSuccessfullyUploadedFiles []UploadedFile
+	var BookImages []models.BookImage
+
+	for _, f := range files {
+		//save the file to specific dst
+		extension := filepath.Ext(f.Filename)
+		uploaded_file := SaveToBucket(c, f, extension, f.Filename)
+		if uploaded_file.Status {
+			SuccessfullyUploadedFiles = append(SuccessfullyUploadedFiles, uploaded_file)
+			BookImages = append(BookImages, models.BookImage{
+				URL:       uploaded_file.Path,
+				BookId:    uploaded_file.BookId,
+				CreatedAt: time.Now(),
+			})
+
+		} else {
+			UnSuccessfullyUploadedFiles = append(UnSuccessfullyUploadedFiles, uploaded_file)
+		}
+	}
+	models.DB.Create(&BookImages)
+
+	c.JSON(http.StatusOK, gin.H{
+		"successful": SuccessfullyUploadedFiles, "unsuccessful": UnSuccessfullyUploadedFiles,
+	})
+
 }

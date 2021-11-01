@@ -28,9 +28,11 @@ func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 	r.POST("supervisor/create", controllers.CreateSupervisor)
 	r.POST("admin/create", controllers.CreateAdmin)
 
+	//books endpoints
 	r.POST("books/create", controllers.CreateBook)
 	r.GET("books/", controllers.ListAllBook)
 	r.GET("books/:id", controllers.GetBook)
+	r.POST("books/:id/image/upload", controllers.UploadBookImages)
 	r.PATCH("books/:id", controllers.UpdateBook)
 
 	//category endpoints
@@ -38,6 +40,9 @@ func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 	r.POST("category/create", controllers.CreateCategory)
 	r.PATCH("category/:id", controllers.UpdateCategory)
 	r.GET("category/:id", controllers.GetCategory)
+
+	//cart endpoints
+	r.POST("cart/add", controllers.AddToCart)
 
 }
 

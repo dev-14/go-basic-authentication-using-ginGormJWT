@@ -109,9 +109,9 @@ func ConnectDataBase() {
 	// connection.AutoMigrate(models...)
 
 	//normal migration
-	err = connection.AutoMigrate(&UserRole{}, &User{}, &Book{}, &Category{})
+	err = connection.AutoMigrate(&UserRole{}, &User{}, &Book{}, &Cart{}, &BookImage{}, &Category{})
 	if err != nil {
-		fmt.Println("error is: ", err)
+		fmt.Println("error in migration: ", err)
 	}
 	fmt.Println("Done migrating")
 
