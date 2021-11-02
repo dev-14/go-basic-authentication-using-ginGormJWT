@@ -146,9 +146,9 @@ func DeleteFromCart(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-
+	userId := User.ID
 	// Check if the product already exists.
-	err := models.DB.Where("book_id = ?", c.Param("id")).Delete(&Cart).Error
+	err := models.DB.Where("book_id = ? AND user_id = ?", c.Param("id"), userId).Delete(&Cart).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "product not in cart."})
 		return
