@@ -92,16 +92,79 @@ func ViewCart(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	user_email, _ := claims["email"]
 	var User models.User
-	//var Book []models.Book
-	//var existingBook []ReturnedBook
-	//var Cart models.Cart
+	var Book []models.Book
+	var Cart []models.Cart
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	//if err = models.DB.Where("")
-	//models.DB.Model(Cart).Find(&existingBook)
-	//c.JSON(http.StatusOK, existingBook)
+	userid := User.ID
+
+	if err := models.DB.Where("user_id = ?", userid).Find(&Cart).Error; err != nil {
+		c.JSON(http.StatusFound, gin.H{
+			"message": "Cart does not exist",
+		})
+	}
+	//bookId := Cart
+	//var bookId []int
+	//c.JSON(http.StatusOK, Cart)
+	for _, cart := range Cart {
+		var tempBook models.Book
+		bookId := cart.BookID
+		fmt.Println(bookId)
+		//bookid := append(bookId, cart.BookID)
+		if err := models.DB.Where("ID = ?", bookId).Find(&tempBook).Error; err != nil {
+			c.JSON(http.StatusFound, gin.H{
+				"message": "Cart is empty",
+			})
+		}
+		Book = append(Book, tempBook)
+	}
+
+	// //models.DB.Model(Cart).Find(&existingBook)
+	c.JSON(http.StatusOK, Book)
 	return
+}
+
+// DeleteFromCart godoc
+// @Summary DeleteFromCart endpoint is used to delete book from cart.
+// @Description DeleteFromCart endpoint is used to delete book from cart.
+// @Router /api/v1/auth/cart/delete/:id/ [delete]
+// @Tags book
+// @Accept json
+// @Produce json
+func DeleteFromCart(c *gin.Context) {
+	// var existingBook models.Book
+	// var updateBook models.Book
+	var Cart models.Cart
+	claims := jwt.ExtractClaims(c)
+	user_email, _ := claims["email"]
+	var User models.User
+
+	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Check if the product already exists.
+	err := models.DB.Where("book_id = ?", c.Param("id")).Delete(&Cart).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "product not in cart."})
+		return
+	}
+	//err = models.DB.Delete(&Cart).Error
+	// models.DB.Where("book_id = ?", c.paaram)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"Success": "Book removed from cart",
+		})
+	}
+	// if err := c.ShouldBindJSON(&updateBook); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	//models.DB.Model(&existingBook).Updates(updateBook)
+
 }

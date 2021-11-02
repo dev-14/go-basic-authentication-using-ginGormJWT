@@ -43,6 +43,8 @@ func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 
 	//cart endpoints
 	r.POST("cart/add", controllers.AddToCart)
+	r.GET("cart/view", controllers.ViewCart)
+	r.DELETE("cart/delete/:id", controllers.DeleteFromCart)
 
 }
 

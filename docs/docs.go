@@ -151,6 +151,60 @@ var doc = `{
                 ]
             }
         },
+        "/api/v1/auth/cart/add": {
+            "post": {
+                "description": "AddToCart endpoint is used to add the book to the cart.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "AddToCart endpoint is used to add the book to the cart.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "title of the book",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/cart/delete/:id/": {
+            "delete": {
+                "description": "DeleteFromCart endpoint is used to delete book from cart.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "DeleteFromCart endpoint is used to delete book from cart."
+            }
+        },
+        "/api/v1/auth/cart/view": {
+            "get": {
+                "description": "API Endpoint to view the cart items.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "ViewCart endpoint is used to list all book."
+            }
+        },
         "/api/v1/auth/category/": {
             "get": {
                 "description": "ListAllCategories endpoint is used to list all the categories.",
@@ -216,6 +270,21 @@ var doc = `{
                         "required": true
                     }
                 ]
+            }
+        },
+        "/api/v1/auth/product/:id/image/upload": {
+            "post": {
+                "description": "API Endpoint to register the user with the role of Supervisor or Admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "UploadProductImages endpoint is used to add images to product."
             }
         },
         "/api/v1/auth/supervisor/create": {

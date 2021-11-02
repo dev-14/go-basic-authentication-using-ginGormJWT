@@ -99,6 +99,42 @@ paths:
         new book.
       tags:
       - book
+  /api/v1/auth/cart/add:
+    post:
+      consumes:
+      - application/json
+      description: AddToCart endpoint is used to add the book to the cart.
+      parameters:
+      - description: title of the book
+        in: formData
+        name: title
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: AddToCart endpoint is used to add the book to the cart.
+      tags:
+      - book
+  /api/v1/auth/cart/delete/:id/:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteFromCart endpoint is used to delete book from cart.
+      produces:
+      - application/json
+      summary: DeleteFromCart endpoint is used to delete book from cart.
+      tags:
+      - book
+  /api/v1/auth/cart/view:
+    get:
+      consumes:
+      - application/json
+      description: API Endpoint to view the cart items.
+      produces:
+      - application/json
+      summary: ViewCart endpoint is used to list all book.
+      tags:
+      - book
   /api/v1/auth/category/:
     get:
       consumes:
@@ -144,6 +180,17 @@ paths:
       summary: CreateCategory endpoint is used by admin to create category.
       tags:
       - category
+  /api/v1/auth/product/:id/image/upload:
+    post:
+      consumes:
+      - application/json
+      description: API Endpoint to register the user with the role of Supervisor or
+        Admin.
+      produces:
+      - application/json
+      summary: UploadProductImages endpoint is used to add images to product.
+      tags:
+      - product
   /api/v1/auth/supervisor/create:
     post:
       consumes:
