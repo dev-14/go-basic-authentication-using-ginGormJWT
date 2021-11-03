@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -106,12 +105,25 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 	return false
 }
 
+func NewRedisCache(user models.User) {
+	//fmt.Println("setCache hit")
+	Rdb.HSet("user", "email", user.Email)
+	Rdb.HSet("user", "ID", user.ID)
+	Rdb.HSet("user", "RoleID", user.UserRoleID)
+	fmt.Println(Rdb.HGetAll("user").Result())
+}
+
+func deleteRedis(c *gin.Context) {
+	Rdb.Del("user")
+	fmt.Println("Redis Cleared")
+}
+
 func IsAdmin(c *gin.Context) bool {
-	//token := c.GetHeader("token")
-	claims := jwt.ExtractClaims(c)
-	fmt.Println(claims)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
+	user_email, _ := Rdb.HGet("user", "email").Result()
+	// fmt.Println(Rdb.HGetAll("user"))
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
@@ -121,9 +133,10 @@ func IsAdmin(c *gin.Context) bool {
 }
 
 func IsSupervisor(c *gin.Context) bool {
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
+	user_email, _ := Rdb.HGet("user", "email").Result()
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {

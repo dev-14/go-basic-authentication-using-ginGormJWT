@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -28,14 +27,23 @@ import (
 func CreateBook(c *gin.Context) {
 
 	var existingBook models.Book
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
-	var User models.User
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
+	//var User models.User
 	var category models.Category
+	// user_email, _ := Rdb.HGet("user", "email").Result()
 
-	// Check if the current user had admin role.
-	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added by supervisor user"})
+	// // Check if the current user had admin role.
+	// if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added by supervisor user"})
+	// 	return
+	// }
+	id, _ := Rdb.HGet("user", "ID").Result()
+	ID, _ := strconv.Atoi(id)
+	roleId, _ := Rdb.HGet("user", "RoleID").Result()
+
+	if roleId != "2" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be added by supervisor"})
 		return
 	}
 
@@ -77,7 +85,7 @@ func CreateBook(c *gin.Context) {
 		Title:      title,
 		CategoryId: category.ID,
 		Price:      price,
-		CreatedBy:  User.ID,
+		CreatedBy:  ID,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
@@ -104,13 +112,21 @@ func CreateBook(c *gin.Context) {
 func UpdateBook(c *gin.Context) {
 	var existingBook models.Book
 	var updateBook models.Book
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
-	var User models.User
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
+	//var User models.User
+	// user_email, _ := Rdb.HGet("user", "email").Result()
 
-	// Check if the current user had admin role.
-	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
+	// // Check if the current user had admin role.
+	// if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
+	// 	return
+	// }
+
+	id, _ := Rdb.HGet("user", "RoleID").Result()
+
+	if id != "2" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be updated by supervisor"})
 		return
 	}
 
@@ -168,11 +184,12 @@ func GetBook(c *gin.Context) {
 func ListAllBook(c *gin.Context) {
 
 	// allProduct := []models.Product{}
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
 	var Book []models.Book
 	var existingBook []ReturnedBook
+	user_email, _ := Rdb.HGet("user", "email").Result()
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -192,7 +209,19 @@ func ListAllBook(c *gin.Context) {
 // @Produce json
 func DeleteBook(c *gin.Context) {
 	var existingBook models.Book
+	// var User models.User
+	// user_email, _ := Rdb.HGet("user", "email").Result()
 
+	// if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
+	// 	return
+	// }
+	id, _ := Rdb.HGet("user", "RoleID").Result()
+
+	if id != "2" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be deleted by supervisor"})
+		return
+	}
 	// Check if the product already exists.
 	err := models.DB.Where("id = ?", c.Param("id")).First(&existingBook).Error
 	if err != nil {

@@ -1,14 +1,22 @@
 package controllers
 
 import (
+	"fmt"
 	"gingorm/models"
 	"html/template"
 	"net/http"
+	"strconv"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	//"github.com/go-redis/redis/v8"
 )
+
+// var Rdb = redis.NewClient(&redis.Options{
+// 	Addr:     "localhost:6379",
+// 	Password: "", // no password set
+// 	DB:       0,  // use default DB
+// })
 
 // CreateCategory godoc
 // @Summary CreateCategory endpoint is used by admin to create category.
@@ -20,14 +28,24 @@ import (
 // @Param name formData string true "name of the category"
 func CreateCategory(c *gin.Context) {
 	var existingCategory models.Category
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
-	var User models.User
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
+	//var User models.User
+	fmt.Println(Rdb.HGetAll("user"))
+	// user_email, err := Rdb.HGet("user", "email").Result()
+	id, _ := Rdb.HGet("user", "ID").Result()
+	ID, _ := strconv.Atoi(id)
+	roleId, _ := Rdb.HGet("user", "RoleID").Result()
 
-	// Check if the current user had admin role.
-	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be added by admin user"})
+	if roleId != "1" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
+		return
 	}
+
+	// // Check if the current user had admin role.
+	// if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be added by admin user"})
+	// }
 
 	c.Request.ParseForm()
 	var flag bool
@@ -50,7 +68,7 @@ func CreateCategory(c *gin.Context) {
 
 	cat := models.Category{
 		CategoryName: category_title,
-		CreatedBy:    User.ID,
+		CreatedBy:    ID,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -81,11 +99,12 @@ type ReturnedCategory struct {
 // @Produce json
 func ListAllCategories(c *gin.Context) {
 
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
 	var Categories []models.Category
 	var ExistingCategories []ReturnedCategory
+	user_email, _ := Rdb.HGet("user", "email").Result()
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -127,16 +146,23 @@ func GetCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 func UpdateCategory(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
-	var User models.User
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
+	//var User models.User
 	var existingCategory models.Category
 	var UpdateCategory models.Category
+	//user_email, _ := Rdb.HGet("user", "email").Result()
+	id, _ := Rdb.HGet("user", "RoleID").Result()
 
-	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+	if id != "1" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
 		return
 	}
+
+	// if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
+	// 	return
+	// }
 	// Check if the product already exists.
 	err := models.DB.Where("id = ?", c.Param("id")).First(&existingCategory).Error
 	if err != nil {

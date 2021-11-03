@@ -8,8 +8,8 @@ import (
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
-	//"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 )
 
 const SecretKey = "secret"
@@ -20,6 +20,12 @@ type tempUser struct {
 	Email           string `json:"email" binding:"required"`
 	Password        string `json:"password" binding:"required"`
 	ConfirmPassword string `json:"confirmpassword" binding:"required"`
+}
+
+type RedisCache struct {
+	Id     int
+	Email  string
+	RoleId int
 }
 
 func ReturnParameterMissingError(c *gin.Context, parameter string) {
@@ -109,6 +115,14 @@ type login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
+var Rdb = redis.NewClient(&redis.Options{
+	Addr:     "localhost:6379",
+	Password: "", // no password set
+	DB:       0,  // use default DB
+})
+
+// redisClient := Redis.createclient()
+
 // Login godoc
 // @Summary Login endpoint is used by the user to login.
 // @Description API Endpoint to register the user with the role of customer.
@@ -119,7 +133,7 @@ type login struct {
 func Login(c *gin.Context) (interface{}, error) {
 	var loginVals login
 	// var User User
-	var users []models.User
+	var user models.User
 	var count int64
 	// var user models.User
 	if err := c.ShouldBind(&loginVals); err != nil {
@@ -127,16 +141,23 @@ func Login(c *gin.Context) (interface{}, error) {
 	}
 	email := loginVals.Email
 	// First check if the user exist or not...
-	models.DB.Where("email = ?", email).Find(&users).Count(&count)
+	models.DB.Where("email = ?", email).First(&user).Count(&count)
 	if count == 0 {
 		return nil, jwt.ErrFailedAuthentication
 	}
 	if CheckCredentials(loginVals.Email, loginVals.Password, models.DB) == true {
+		NewRedisCache(user)
 		return &models.User{
 			Email: email,
 		}, nil
 	}
-	//token := jwt.GetToken(c)
+	// fmt.Println("set value ", loginVals.Email)
+	// err := rdb.Set("email", loginVals.Email, 0).Err()
+	// if err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{
+	// 		"error": "error in redis",
+	// 	})
+	// }
 
 	return nil, jwt.ErrFailedAuthentication
 }
@@ -150,7 +171,8 @@ func Login(c *gin.Context) (interface{}, error) {
 // @Produce json
 // @Param login formData tempUser true "Info of the user"
 func CreateSupervisor(c *gin.Context) {
-	fmt.Println("supervisor api hit")
+	//fmt.Println("supervisor api hit")
+
 	if !IsAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 	}
@@ -233,11 +255,25 @@ func CreateSupervisor(c *gin.Context) {
 // @Produce json
 // @Param login formData tempUser true "Info of the user"
 func CreateAdmin(c *gin.Context) {
+	//var User models.User
+	// if !IsAdmin(c) {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	// }
+	// user_email := rdb.
+	//fmt.Println("test line")
+	//fmt.Println(user_email)
+	// if err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{
+	// 		"error": "redis get not working",
+	// 	})
+	// }
+	// //fmt.Println()
 
-	if !IsAdmin(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-	}
-	// Create a user with the role of supervisor.
+	// if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	// 	return
+	// }
+
 	var tempUser tempUser
 	var Role models.UserRole
 
