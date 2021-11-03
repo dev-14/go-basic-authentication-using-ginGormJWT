@@ -4,8 +4,10 @@ import (
 	//"net/http"
 
 	//_ "gingorm/docs"
+	"fmt"
 	"gingorm/models"
 	"gingorm/routes"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	//jwt "github.com/appleboy/gin-jwt/v2"
@@ -28,6 +30,8 @@ func main() {
 	models.ConnectDataBase() // load db
 	var router = make(chan *gin.Engine)
 	go routes.GetRouter(router)
+	var port string = os.Getenv("SERVER_PORT")
+	server_addr := fmt.Sprintf(":%s", port)
 	r := <-router
-	r.Run()
+	r.Run(server_addr)
 }

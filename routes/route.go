@@ -34,6 +34,7 @@ func AuthenticatedEndpoints(r *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 	r.GET("books/:id", controllers.GetBook)
 	r.POST("books/:id/image/upload", controllers.UploadBookImages)
 	r.PATCH("books/:id", controllers.UpdateBook)
+	r.DELETE("books/delete/:id", controllers.DeleteBook)
 
 	//category endpoints
 	r.GET("category/", controllers.ListAllCategories)

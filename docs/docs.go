@@ -151,6 +151,21 @@ var doc = `{
                 ]
             }
         },
+        "/api/v1/auth/books/delete/:id/": {
+            "delete": {
+                "description": "DeleteBook endpoint is used to delete a book.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "DeleteBook endpoint is used to delete a book."
+            }
+        },
         "/api/v1/auth/cart/add": {
             "post": {
                 "description": "AddToCart endpoint is used to add the book to the cart.",

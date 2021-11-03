@@ -183,6 +183,28 @@ func ListAllBook(c *gin.Context) {
 	return
 }
 
+// DeleteBook godoc
+// @Summary DeleteBook endpoint is used to delete a book.
+// @Description DeleteBook endpoint is used to delete a book.
+// @Router /api/v1/auth/books/delete/:id/ [delete]
+// @Tags book
+// @Accept json
+// @Produce json
+func DeleteBook(c *gin.Context) {
+	var existingBook models.Book
+
+	// Check if the product already exists.
+	err := models.DB.Where("id = ?", c.Param("id")).First(&existingBook).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "product doesnot exists."})
+		return
+	}
+	models.DB.Where("id = ?", c.Param("id")).Delete(&existingBook)
+	// GET FROM CACHE FIRST
+	c.JSON(http.StatusOK, gin.H{"Success": "Book deleted"})
+	return
+}
+
 type UploadedFile struct {
 	Status   bool
 	BookId   int

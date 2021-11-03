@@ -99,6 +99,16 @@ paths:
         new book.
       tags:
       - book
+  /api/v1/auth/books/delete/:id/:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteBook endpoint is used to delete a book.
+      produces:
+      - application/json
+      summary: DeleteBook endpoint is used to delete a book.
+      tags:
+      - book
   /api/v1/auth/cart/add:
     post:
       consumes:
