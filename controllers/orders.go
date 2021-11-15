@@ -92,8 +92,9 @@ func ViewCart(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	user_email, _ := claims["email"]
 	var User models.User
-	var Book []models.Book
+	//var Book []models.Book
 	var Cart []models.Cart
+	//var exCart models.Cart
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -103,27 +104,63 @@ func ViewCart(c *gin.Context) {
 
 	if err := models.DB.Where("user_id = ?", userid).Find(&Cart).Error; err != nil {
 		c.JSON(http.StatusFound, gin.H{
-			"message": "Cart does not exist",
+			"message": "Cart empty",
 		})
 	}
-	//bookId := Cart
-	//var bookId []int
-	//c.JSON(http.StatusOK, Cart)
-	for _, cart := range Cart {
-		var tempBook models.Book
-		bookId := cart.BookID
-		fmt.Println(bookId)
-		//bookid := append(bookId, cart.BookID)
-		if err := models.DB.Where("ID = ?", bookId).Find(&tempBook).Error; err != nil {
-			c.JSON(http.StatusFound, gin.H{
-				"message": "Cart is empty",
-			})
-		}
-		Book = append(Book, tempBook)
+
+	var title string
+	var price int
+	//JOINING TABLE USING RAW QUERY
+	// rows, err := models.DB.Raw("SELECT title,price FROM books INNER JOIN carts on books.id=carts.book_id").Rows()
+	// if err != nil {
+	// 	c.JSON(404, gin.H{
+	// 		"error": err,
+	// 	})
+	// }
+	// for rows.Next() {
+	// 	rows.Scan(&title, &price)
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"title": title,
+	// 		"price": price,
+	// 	})
+	// }
+
+	//JOINING TABLE USING GORM JOINS
+	rows, err := models.DB.Table("books").Select("books.title", "books.price").Joins("inner join carts on carts.book_id = books.id and carts.user_id=? ", userid).Rows()
+	if err != nil {
+		c.JSON(404, gin.H{
+			"error": err,
+		})
+	}
+	// if rows == nil {
+	// 	c.JSON(http.StatusNoContent, gin.H{
+	// 		"message": "cart is empty",
+	// 	})
+	// }
+	for rows.Next() {
+		rows.Scan(&title, &price)
+		c.JSON(http.StatusOK, gin.H{
+			"title": title,
+			"price": price,
+		})
 	}
 
-	// //models.DB.Model(Cart).Find(&existingBook)
-	c.JSON(http.StatusOK, Book)
+	// INDIVIDUAL QUERY SEARCHING FOR EACH CART ELEMENT
+	// for _, cart := range Cart {
+	// 	var tempBook models.Book
+	// 	bookId := cart.BookID
+	// 	//fmt.Println(bookId)
+	// 	//bookid := append(bookId, cart.BookID)
+	// 	if err := models.DB.Where("ID = ?", bookId).Find(&tempBook).Error; err != nil {
+	// 		c.JSON(http.StatusFound, gin.H{
+	// 			"message": "error searching book",
+	// 		})
+	// 	}
+	// 	Book = append(Book, tempBook)
+	// }
+
+	// // //models.DB.Model(Cart).Find(&existingBook)
+	// c.JSON(http.StatusOK, Book)
 	return
 }
 
