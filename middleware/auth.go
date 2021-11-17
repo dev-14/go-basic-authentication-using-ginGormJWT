@@ -40,7 +40,7 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		// LoginResponse: func(*gin.Context, int, string, time.Time) {
 		// },
 		LogoutResponse: func(c *gin.Context, code int) {
-			controllers.Rdb.Del("user")
+			models.Rdb.Del("user")
 			fmt.Println("Redis Cleared")
 			c.JSON(code, gin.H{
 				"message": "logged out successfully",

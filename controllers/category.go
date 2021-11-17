@@ -31,11 +31,11 @@ func CreateCategory(c *gin.Context) {
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
 	//var User models.User
-	fmt.Println(Rdb.HGetAll("user"))
+	fmt.Println(models.Rdb.HGetAll("user"))
 	// user_email, err := Rdb.HGet("user", "email").Result()
-	id, _ := Rdb.HGet("user", "ID").Result()
+	id, _ := models.Rdb.HGet("user", "ID").Result()
 	ID, _ := strconv.Atoi(id)
-	roleId, _ := Rdb.HGet("user", "RoleID").Result()
+	roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if roleId != "1" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
@@ -104,7 +104,7 @@ func ListAllCategories(c *gin.Context) {
 	var User models.User
 	var Categories []models.Category
 	var ExistingCategories []ReturnedCategory
-	user_email, _ := Rdb.HGet("user", "email").Result()
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -152,7 +152,7 @@ func UpdateCategory(c *gin.Context) {
 	var existingCategory models.Category
 	var UpdateCategory models.Category
 	//user_email, _ := Rdb.HGet("user", "email").Result()
-	id, _ := Rdb.HGet("user", "RoleID").Result()
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "1" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})

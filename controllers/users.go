@@ -9,7 +9,6 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
 )
 
 const SecretKey = "secret"
@@ -114,12 +113,6 @@ type login struct {
 	Email    string `form:"email" json:"email" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
-
-var Rdb = redis.NewClient(&redis.Options{
-	Addr:     "localhost:6379",
-	Password: "", // no password set
-	DB:       0,  // use default DB
-})
 
 // redisClient := Redis.createclient()
 

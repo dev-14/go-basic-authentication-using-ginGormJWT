@@ -107,14 +107,14 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 
 func NewRedisCache(user models.User) {
 	//fmt.Println("setCache hit")
-	Rdb.HSet("user", "email", user.Email)
-	Rdb.HSet("user", "ID", user.ID)
-	Rdb.HSet("user", "RoleID", user.UserRoleID)
-	fmt.Println(Rdb.HGetAll("user").Result())
+	models.Rdb.HSet("user", "email", user.Email)
+	models.Rdb.HSet("user", "ID", user.ID)
+	models.Rdb.HSet("user", "RoleID", user.UserRoleID)
+	fmt.Println(models.Rdb.HGetAll("user").Result())
 }
 
 func deleteRedis(c *gin.Context) {
-	Rdb.Del("user")
+	models.Rdb.Del("user")
 	fmt.Println("Redis Cleared")
 }
 
@@ -122,8 +122,8 @@ func IsAdmin(c *gin.Context) bool {
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
 	var User models.User
-	user_email, _ := Rdb.HGet("user", "email").Result()
-	// fmt.Println(Rdb.HGetAll("user"))
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
+	fmt.Println(models.Rdb.HGetAll("user"))
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
@@ -136,7 +136,7 @@ func IsSupervisor(c *gin.Context) bool {
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
 	var User models.User
-	user_email, _ := Rdb.HGet("user", "email").Result()
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {

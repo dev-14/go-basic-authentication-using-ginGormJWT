@@ -3,16 +3,19 @@ package models
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	//"github.com/jinzhu/gorm"
+	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 )
 
 var DB *gorm.DB
+var Rdb *redis.Client
 
 type Settings struct {
 	DB_HOST     string
@@ -28,6 +31,16 @@ func InitializeSettings() Settings {
 	DB_USER := os.Getenv("DB_USER")
 	DB_PASSWORD := os.Getenv("DB_PASSWORD")
 	DB_PORT := os.Getenv("DB_PORT")
+
+	var addr = os.Getenv("REDIS_PORT")
+	var pass = os.Getenv("REDIS_PASSWORD")
+	db, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+	fmt.Println(addr, pass, db)
+	Rdb = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: pass, // no password set
+		DB:       db,   // use default DB
+	})
 
 	switch {
 	case DB_HOST == "":

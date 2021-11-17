@@ -38,9 +38,10 @@ func CreateBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added by supervisor user"})
 	// 	return
 	// }
-	id, _ := Rdb.HGet("user", "ID").Result()
+	id, _ := models.Rdb.HGet("user", "ID").Result()
+
 	ID, _ := strconv.Atoi(id)
-	roleId, _ := Rdb.HGet("user", "RoleID").Result()
+	roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if roleId != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be added by supervisor"})
@@ -123,7 +124,7 @@ func UpdateBook(c *gin.Context) {
 	// 	return
 	// }
 
-	id, _ := Rdb.HGet("user", "RoleID").Result()
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be updated by supervisor"})
@@ -189,7 +190,7 @@ func ListAllBook(c *gin.Context) {
 	var User models.User
 	var Book []models.Book
 	var existingBook []ReturnedBook
-	user_email, _ := Rdb.HGet("user", "email").Result()
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -216,7 +217,7 @@ func DeleteBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
 	// 	return
 	// }
-	id, _ := Rdb.HGet("user", "RoleID").Result()
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be deleted by supervisor"})
