@@ -29,6 +29,7 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		},
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*models.User); ok {
+				fmt.Println(v.Email)
 				return jwt.MapClaims{identityKey: v.Email}
 			}
 
@@ -40,7 +41,8 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		// LoginResponse: func(*gin.Context, int, string, time.Time) {
 		// },
 		LogoutResponse: func(c *gin.Context, code int) {
-			models.Rdb.Del("user")
+			email := c.GetString("user_email")
+			models.Rdb.Del(email)
 			fmt.Println("Redis Cleared")
 			c.JSON(code, gin.H{
 				"message": "logged out successfully",

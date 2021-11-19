@@ -105,18 +105,19 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 	return false
 }
 
-func NewRedisCache(user models.User) {
+func NewRedisCache(c *gin.Context, user models.User) {
 	//fmt.Println("setCache hit")
-	models.Rdb.HSet("user", "email", user.Email)
-	models.Rdb.HSet("user", "ID", user.ID)
-	models.Rdb.HSet("user", "RoleID", user.UserRoleID)
-	fmt.Println(models.Rdb.HGetAll("user").Result())
+	c.Set("user_email", user.Email)
+	models.Rdb.HSet(user.Email, "email", user.Email)
+	models.Rdb.HSet(user.Email, "ID", user.ID)
+	models.Rdb.HSet(user.Email, "RoleID", user.UserRoleID)
+	fmt.Println(models.Rdb.HGetAll(user.Email).Result())
 }
 
-func deleteRedis(c *gin.Context) {
-	models.Rdb.Del("user")
-	fmt.Println("Redis Cleared")
-}
+// func deleteRedis(c *gin.Context, user) {
+// 	models.Rdb.Del(user.Email)
+// 	fmt.Println("Redis Cleared")
+// }
 
 func IsAdmin(c *gin.Context) bool {
 	// claims := jwt.ExtractClaims(c)

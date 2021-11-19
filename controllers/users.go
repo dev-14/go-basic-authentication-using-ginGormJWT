@@ -139,7 +139,7 @@ func Login(c *gin.Context) (interface{}, error) {
 		return nil, jwt.ErrFailedAuthentication
 	}
 	if CheckCredentials(loginVals.Email, loginVals.Password, models.DB) == true {
-		NewRedisCache(user)
+		NewRedisCache(c, user)
 		return &models.User{
 			Email: email,
 		}, nil
