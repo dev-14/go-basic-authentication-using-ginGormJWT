@@ -108,10 +108,11 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 func NewRedisCache(c *gin.Context, user models.User) {
 	//fmt.Println("setCache hit")
 	c.Set("user_email", user.Email)
-	models.Rdb.HSet(user.Email, "email", user.Email)
-	models.Rdb.HSet(user.Email, "ID", user.ID)
-	models.Rdb.HSet(user.Email, "RoleID", user.UserRoleID)
-	fmt.Println(models.Rdb.HGetAll(user.Email).Result())
+	fmt.Println(c.GetString("user_email"))
+	models.Rdb.HSet("user", "email", user.Email)
+	models.Rdb.HSet("user", "ID", user.ID)
+	models.Rdb.HSet("user", "RoleID", user.UserRoleID)
+	fmt.Println(models.Rdb.HGetAll("user").Result())
 }
 
 // func deleteRedis(c *gin.Context, user) {

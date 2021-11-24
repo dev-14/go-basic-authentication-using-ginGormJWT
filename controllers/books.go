@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"gingorm/models"
 	"html/template"
 	"log"
@@ -123,8 +124,8 @@ func UpdateBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
 	// 	return
 	// }
-	email := c.GetString("user_email")
-	id, _ := models.Rdb.HGet(email, "RoleID").Result()
+	//email := c.GetString("user_email")
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be updated by supervisor"})
@@ -172,7 +173,6 @@ func GetBook(c *gin.Context) {
 
 	// GET FROM CACHE FIRST
 	c.JSON(http.StatusOK, gin.H{"product": existingBook})
-	return
 }
 
 // ListAllBook godoc
@@ -191,7 +191,9 @@ func ListAllBook(c *gin.Context) {
 	var Book []models.Book
 	var existingBook []ReturnedBook
 	email := c.GetString("user_email")
-	user_email, _ := models.Rdb.HGet(email, "email").Result()
+	fmt.Println("c variable" + email)
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
+	fmt.Println("user" + user_email)
 
 	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -199,7 +201,6 @@ func ListAllBook(c *gin.Context) {
 	}
 	models.DB.Model(Book).Find(&existingBook)
 	c.JSON(http.StatusOK, existingBook)
-	return
 }
 
 // DeleteBook godoc
@@ -218,8 +219,8 @@ func DeleteBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
 	// 	return
 	// }
-	email := c.GetString("user_email")
-	id, _ := models.Rdb.HGet(email, "RoleID").Result()
+	//email := c.GetString("user_email")
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be deleted by supervisor"})
@@ -234,7 +235,6 @@ func DeleteBook(c *gin.Context) {
 	models.DB.Where("id = ?", c.Param("id")).Delete(&existingBook)
 	// GET FROM CACHE FIRST
 	c.JSON(http.StatusOK, gin.H{"Success": "Book deleted"})
-	return
 }
 
 type UploadedFile struct {

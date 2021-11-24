@@ -87,10 +87,10 @@ func logToFile(b []byte, failed bool) {
 }
 
 func logToDB(b []byte, failed bool) {
-
+	fmt.Println(failed)
 	if failed {
 		var u1 = uuid.Must(uuid.NewV4())
-		rawRequest := models.RequestLog{
+		rawRequest := models.FailedRequestLog{
 			ID:         u1,
 			RawRequest: string(b),
 		}
@@ -99,7 +99,7 @@ func logToDB(b []byte, failed bool) {
 		return
 	}
 	var u1 = uuid.Must(uuid.NewV4())
-	rawRequest := models.FailedRequestLog{
+	rawRequest := models.RequestLog{
 		ID:         u1,
 		RawRequest: string(b),
 	}
