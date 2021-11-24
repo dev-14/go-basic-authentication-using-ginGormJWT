@@ -7,10 +7,11 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/lib/pq v1.10.3
+	github.com/lib/pq v1.10.3 // indirect
 	github.com/onsi/gomega v1.16.0 // indirect
 	github.com/swaggo/gin-swagger v1.3.2
 	github.com/swaggo/swag v1.7.3

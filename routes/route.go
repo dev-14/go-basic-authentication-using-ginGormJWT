@@ -54,7 +54,8 @@ func GetRouter(router chan *gin.Engine) {
 	r := gin.Default()
 
 	r.Use(cors.Default())
-
+	r.Use(middlewares.RequestLogger)
+	r.Use(gin.CustomRecovery(middlewares.LogFailedRequests))
 	authMiddleware, _ := middlewares.GetAuthMiddleware()
 
 	// Create a BASE_URL - /api/v1
