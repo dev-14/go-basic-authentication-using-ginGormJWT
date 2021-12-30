@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"net/http"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,13 +20,32 @@ import (
 func AddToCart(c *gin.Context) {
 
 	//var existingBook models.Book
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
 	var Book models.Book
 
+	username, _ := models.Rdb.HGet("user", "username").Result()
+	if username == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	username, _ = models.Rdb.HGet("user", "username").Result()
+	// ID, _ := strconv.Atoi(id)
+
 	// Check if the current user had admin role.
-	if err := models.DB.Where("email = ? AND user_role_id=3", user_email).First(&User).Error; err != nil {
+	// if err := models.DB.Where("email = ? AND user_role_id=3", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added to cart by user"})
+	// 	return
+	// }
+	if !IsAuthorized(username) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added to cart by user"})
 		return
 	}
@@ -79,6 +97,11 @@ func AddToCart(c *gin.Context) {
 
 }
 
+type book struct {
+	Title string `json:"title"` // these json tags are used in front end to access these variables.
+	Price int    `json:"price"` // Exporting variables is also required for this purpose
+}
+
 // ViewCart godoc
 // @Summary ViewCart endpoint is used to list all book.
 // @Description API Endpoint to view the cart items.
@@ -89,27 +112,40 @@ func AddToCart(c *gin.Context) {
 func ViewCart(c *gin.Context) {
 
 	// allProduct := []models.Product{}
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
 	//var Book []models.Book
 	var Cart []models.Cart
 	//var exCart models.Cart
 
-	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+	username, _ := models.Rdb.HGet("user", "username").Result()
+	if username == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	username, _ = models.Rdb.HGet("user", "username").Result()
+
+	if err := models.DB.Where("email = ? OR mobile = ?", username, username).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 	userid := User.ID
 
 	if err := models.DB.Where("user_id = ?", userid).Find(&Cart).Error; err != nil {
-		c.JSON(http.StatusFound, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Cart empty",
 		})
+		return
 	}
 
-	var title string
-	var price int
 	//JOINING TABLE USING RAW QUERY
 	// rows, err := models.DB.Raw("SELECT title,price FROM books INNER JOIN carts on books.id=carts.book_id").Rows()
 	// if err != nil {
@@ -137,13 +173,25 @@ func ViewCart(c *gin.Context) {
 	// 		"message": "cart is empty",
 	// 	})
 	// }
+	var title string
+	var price int
+	//var onebook book
+	var allbooks []book
 	for rows.Next() {
 		rows.Scan(&title, &price)
-		c.JSON(http.StatusOK, gin.H{
-			"title": title,
-			"price": price,
-		})
+		onebook := book{
+			Title: title,
+			Price: price,
+		}
+		fmt.Println(onebook)
+		// c.JSON(http.StatusOK, gin.H{
+		// 	"title": title,
+		// 	"price": price,
+		// })
+		allbooks = append(allbooks, onebook)
 	}
+	fmt.Println(allbooks)
+	c.JSON(200, allbooks)
 
 	// INDIVIDUAL QUERY SEARCHING FOR EACH CART ELEMENT
 	// for _, cart := range Cart {
@@ -161,7 +209,7 @@ func ViewCart(c *gin.Context) {
 
 	// // //models.DB.Model(Cart).Find(&existingBook)
 	// c.JSON(http.StatusOK, Book)
-	return
+
 }
 
 // DeleteFromCart godoc
@@ -175,11 +223,25 @@ func DeleteFromCart(c *gin.Context) {
 	// var existingBook models.Book
 	// var updateBook models.Book
 	var Cart models.Cart
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
 
-	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+	username, _ := models.Rdb.HGet("user", "username").Result()
+	if username == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	username, _ = models.Rdb.HGet("user", "RoleID").Result()
+
+	if err := models.DB.Where("email = ?", username).First(&User).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}

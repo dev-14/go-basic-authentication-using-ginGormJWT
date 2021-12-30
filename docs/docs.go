@@ -361,7 +361,31 @@ var doc = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login endpoint is used by the user to login."
+                "summary": "Login endpoint is used by the user to login.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email id",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "description"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/register": {
@@ -376,7 +400,49 @@ var doc = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "register endpoint is used for customer registration. ( Supervisors/admin can be added only by admin. )"
+                "summary": "register endpoint is used for customer registration. ( Supervisors/admin can be added only by admin. )",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email of the user",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "First name of the user",
+                        "name": "first_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Last name of the user",
+                        "name": "last_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the user",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Confirm password.",
+                        "name": "confirm_password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
             }
         }
     }
@@ -433,5 +499,5 @@ func (s *s) ReadDoc() string {
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register("swagger", &s{})
 }
