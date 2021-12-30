@@ -3,8 +3,8 @@ package main
 import (
 	//"net/http"
 
-	//_ "gingorm/docs"
 	"fmt"
+	_ "gingorm/docs"
 	"gingorm/models"
 	"gingorm/routes"
 	"os"

@@ -3,11 +3,13 @@ package controllers
 import (
 	"errors"
 	"gingorm/models"
+	"strings"
 	"unicode"
 
 	"fmt"
 	"log"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -56,14 +58,29 @@ func HashPassword(password string) (string, error) {
 }
 
 // DoesUserExist is a helper function which checks if the user already exists in the user table or not.
-func DoesUserExist(email string) bool {
+func DoesUserExist(username string) bool {
 	var users []models.User
-	err := models.DB.Where("email=?", email).First(&users).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false
+
+	flag := strings.Index(username, "@")
+
+	if flag == -1 {
+		fmt.Println("mobile me aaya")
+		err := models.DB.Where("mobile=?", username).First(&users).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return false
+			}
+		}
+	} else {
+		fmt.Println("email me aaya")
+		err := models.DB.Where("email=?", username).First(&users).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return false
+			}
 		}
 	}
+
 	return true
 }
 
@@ -78,14 +95,22 @@ func DoesProductExist(ID int) bool {
 	return true
 }
 
-func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
+func CheckCredentials(username, userpassword string, db *gorm.DB) bool {
 	// db := c.MustGet("db").(*gorm.DB)
 	// var db *gorm.DB
 	var User models.User
 	// Store user supplied password in mem map
 	var expectedpassword string
+	var err error
+	flag := strings.Index(username, "@")
+	if flag == -1 {
+		err = db.Where("mobile = ?", username).First(&User).Error
+	} else {
+		err = db.Where("email = ?", username).First(&User).Error
+	}
 	// check if the email exists
-	err := db.Where("email = ?", useremail).First(&User).Error
+	// err := db.Where("email = ?", username).First(&User).Error
+
 	if err == nil {
 		// User Exists...Now compare his password with our password
 		expectedpassword = User.Password
@@ -108,10 +133,16 @@ func CheckCredentials(useremail, userpassword string, db *gorm.DB) bool {
 func NewRedisCache(c *gin.Context, user models.User) {
 	//fmt.Println("setCache hit")
 	c.Set("user_email", user.Email)
-	models.Rdb.HSet(user.Email, "email", user.Email)
-	models.Rdb.HSet(user.Email, "ID", user.ID)
-	models.Rdb.HSet(user.Email, "RoleID", user.UserRoleID)
-	fmt.Println(models.Rdb.HGetAll(user.Email).Result())
+	fmt.Println(c.GetString("user_email"))
+	if Flag == "email" {
+		models.Rdb.HSet("user", "username", user.Email)
+	} else {
+		models.Rdb.HSet("user", "username", user.Mobile)
+	}
+
+	models.Rdb.HSet("user", "ID", user.ID)
+	models.Rdb.HSet("user", "RoleID", user.UserRoleID)
+	fmt.Println(models.Rdb.HGetAll("user").Result())
 }
 
 // func deleteRedis(c *gin.Context, user) {
@@ -120,11 +151,12 @@ func NewRedisCache(c *gin.Context, user models.User) {
 // }
 
 func IsAdmin(c *gin.Context) bool {
-	// claims := jwt.ExtractClaims(c)
-	// user_email, _ := claims["email"]
+	claims := jwt.ExtractClaims(c)
+	user_email, _ := claims["email"]
 	var User models.User
-	user_email, _ := models.Rdb.HGet("user", "email").Result()
-	fmt.Println(models.Rdb.HGetAll("user"))
+	//email := c.GetString("user_email")
+	// user_email, _ := models.Rdb.HGet("user", "email").Result()
+	//fmt.Println(models.Rdb.HGetAll("user"))
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
@@ -137,11 +169,42 @@ func IsSupervisor(c *gin.Context) bool {
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
 	var User models.User
-	user_email, _ := models.Rdb.HGet("user", "email").Result()
-
+	user_email, _ := models.Rdb.HGet("user", "username").Result()
+	fmt.Println(user_email)
+	// fmt.Println(user_email)
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
 		return false
+	}
+	return true
+}
+
+func FillRedis(c *gin.Context) error {
+	var User models.User
+	claims := jwt.ExtractClaims(c)
+	email := claims["email"]
+
+	err := models.DB.Where("email = ? ", email).First(&User).Error
+	if err != nil {
+		return err
+	}
+	NewRedisCache(c, User)
+	return nil
+}
+
+func IsAuthorized(username string) bool {
+	var User models.User
+	fmt.Println(Flag)
+	if Flag == "email" {
+		if err := models.DB.Where("email = ?", username).First(&User).Error; err != nil {
+			// c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return false
+		}
+	} else {
+		if err := models.DB.Where("mobile = ?", username).First(&User).Error; err != nil {
+			// c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return false
+		}
 	}
 	return true
 }

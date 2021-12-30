@@ -34,9 +34,22 @@ func CreateCategory(c *gin.Context) {
 	email := c.GetString("user_email")
 	fmt.Println(models.Rdb.HGetAll(email))
 	// user_email, err := Rdb.HGet("user", "email").Result()
-	id, _ := models.Rdb.HGet(email, "ID").Result()
+	id, _ := models.Rdb.HGet("user", "ID").Result()
 	ID, _ := strconv.Atoi(id)
-	roleId, _ := models.Rdb.HGet(email, "RoleID").Result()
+	roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
+
+	if roleId == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	roleId, _ = models.Rdb.HGet("user", "RoleID").Result()
 
 	if roleId != "1" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})
@@ -102,13 +115,18 @@ func ListAllCategories(c *gin.Context) {
 
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
-	var User models.User
+	// var User models.User
 	var Categories []models.Category
 	var ExistingCategories []ReturnedCategory
-	email := c.GetString("user_email")
-	user_email, _ := models.Rdb.HGet(email, "email").Result()
+	//email := c.GetString("user_email")
+	username, _ := models.Rdb.HGet("user", "username").Result()
 
-	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+	// if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	// 	return
+	// }
+
+	if !IsAuthorized(username) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
@@ -153,9 +171,22 @@ func UpdateCategory(c *gin.Context) {
 	//var User models.User
 	var existingCategory models.Category
 	var UpdateCategory models.Category
-	email := c.GetString("user_email")
+	//email := c.GetString("user_email")
 	//user_email, _ := Rdb.HGet("user", "email").Result()
-	id, _ := models.Rdb.HGet(email, "RoleID").Result()
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
+
+	if id == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	id, _ = models.Rdb.HGet("user", "RoleID").Result()
 
 	if id != "1" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by admin user"})

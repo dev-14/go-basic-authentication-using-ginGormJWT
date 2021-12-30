@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"gingorm/models"
 	"html/template"
 	"log"
@@ -29,24 +30,49 @@ func CreateBook(c *gin.Context) {
 	var existingBook models.Book
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
-	//var User models.User
+	// var User models.User
 	var category models.Category
-	// user_email, _ := Rdb.HGet("user", "email").Result()
+	fmt.Println("this")
+	// fmt.Println(user_email)
+	// user_email, _ := models.Rdb.HGet("user", "username").Result()
 
-	// // Check if the current user had admin role.
+	id, _ := models.Rdb.HGet("user", "ID").Result()
+	ID, _ := strconv.Atoi(id)
+	roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
+
+	if roleId == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	roleId, _ = models.Rdb.HGet("user", "RoleID").Result()
+
+	if roleId != "2" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category can only be updated by supervisor user"})
+		return
+	}
+
+	// Check if the current user had admin role.
 	// if err := models.DB.Where("email = ? AND user_role_id=2", user_email).First(&User).Error; err != nil {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be added by supervisor user"})
 	// 	return
 	// }
-	id, _ := models.Rdb.HGet("user", "ID").Result()
 
-	ID, _ := strconv.Atoi(id)
-	roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
+	// id, _ := models.Rdb.HGet("user", "ID").Result()
 
-	if roleId != "2" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be added by supervisor"})
-		return
-	}
+	// ID, _ := strconv.Atoi(id)
+	// roleId, _ := models.Rdb.HGet("user", "RoleID").Result()
+
+	// if roleId != "2" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be added by supervisor"})
+	// 	return
+	// }
 
 	c.Request.ParseForm()
 
@@ -123,9 +149,20 @@ func UpdateBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
 	// 	return
 	// }
-	email := c.GetString("user_email")
-	id, _ := models.Rdb.HGet(email, "RoleID").Result()
+	//email := c.GetString("user_email")
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
+	if id == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
 
+	id, _ = models.Rdb.HGet("user", "RoleID").Result()
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be updated by supervisor"})
 		return
@@ -151,6 +188,7 @@ type ReturnedBook struct {
 	ID         int    `json:"id,string"`
 	Title      string `json:"name"`
 	CategoryId int    `json:"category_id"`
+	Price      string `json:"price"`
 }
 
 // GetBook godoc
@@ -162,6 +200,13 @@ type ReturnedBook struct {
 // @Produce json
 func GetBook(c *gin.Context) {
 	var existingBook models.Book
+	var images []models.BookImage
+	//id, _ := models.Rdb.HGet("user", "RoleID").Result()
+
+	// if id == "" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be viewed by logged in users"})
+	// 	return
+	// }
 
 	// Check if the product already exists.
 	err := models.DB.Where("id = ?", c.Param("id")).First(&existingBook).Error
@@ -170,9 +215,16 @@ func GetBook(c *gin.Context) {
 		return
 	}
 
+	err = models.DB.Where("book_id = ?", c.Param("id")).First(&images).Error
+	if err != nil {
+		c.JSON(404, gin.H{"error": err})
+	}
+
 	// GET FROM CACHE FIRST
-	c.JSON(http.StatusOK, gin.H{"product": existingBook})
-	return
+	c.JSON(http.StatusOK, gin.H{
+		"product": existingBook,
+		"images":  images,
+	})
 }
 
 // ListAllBook godoc
@@ -187,19 +239,45 @@ func ListAllBook(c *gin.Context) {
 	// allProduct := []models.Product{}
 	// claims := jwt.ExtractClaims(c)
 	// user_email, _ := claims["email"]
-	var User models.User
+	// var User models.User
 	var Book []models.Book
 	var existingBook []ReturnedBook
 	email := c.GetString("user_email")
-	user_email, _ := models.Rdb.HGet(email, "email").Result()
+	fmt.Println("c variable" + email)
+	username, _ := models.Rdb.HGet("user", "username").Result()
 
-	if err := models.DB.Where("email = ?", user_email).First(&User).Error; err != nil {
+	if username == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+	username, _ = models.Rdb.HGet("user", "username").Result()
+
+	// fmt.Println("user" + user_email)
+
+	// if Flag == "email" {
+	// 	if err := models.DB.Where("email = ?", username).First(&User).Error; err != nil {
+	// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	// 		return
+	// 	}
+	// } else {
+	// 	if err := models.DB.Where("mobile = ?", username).First(&User).Error; err != nil {
+	// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	// 		return
+	// 	}
+	// }
+	if !IsAuthorized(username) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+
 	models.DB.Model(Book).Find(&existingBook)
 	c.JSON(http.StatusOK, existingBook)
-	return
 }
 
 // DeleteBook godoc
@@ -218,9 +296,20 @@ func DeleteBook(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Product can only be updated by supervisor user"})
 	// 	return
 	// }
-	email := c.GetString("user_email")
-	id, _ := models.Rdb.HGet(email, "RoleID").Result()
+	//email := c.GetString("user_email")
+	id, _ := models.Rdb.HGet("user", "RoleID").Result()
+	if id == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
 
+	id, _ = models.Rdb.HGet("user", "RoleID").Result()
 	if id != "2" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Books can only be deleted by supervisor"})
 		return
@@ -234,7 +323,36 @@ func DeleteBook(c *gin.Context) {
 	models.DB.Where("id = ?", c.Param("id")).Delete(&existingBook)
 	// GET FROM CACHE FIRST
 	c.JSON(http.StatusOK, gin.H{"Success": "Book deleted"})
-	return
+}
+
+func GetBooksByCategory(c *gin.Context) {
+
+	var books []models.Book
+
+	id, _ := models.Rdb.HGet("user", "ID").Result()
+	if id == "" {
+		fmt.Println("Redis empty....checking Database for user...")
+		err := FillRedis(c)
+		if err != nil {
+			c.JSON(404, gin.H{
+				"error": "something went wrong with redis",
+			})
+			return
+		}
+	}
+
+	id, _ = models.Rdb.HGet("user", "RoleID").Result()
+
+	err := models.DB.Where("category_id = ?", c.Param("id")).Find(&books).Error
+
+	if err != nil {
+		c.JSON(404, gin.H{
+			"error": "something went wrong with database",
+		})
+	}
+
+	c.JSON(200, books)
+
 }
 
 type UploadedFile struct {
@@ -245,25 +363,67 @@ type UploadedFile struct {
 	Err      string
 }
 
+// func UploadBookImages(c *gin.Context) {
+
+// 	id, _ := strconv.Atoi(c.Param("id"))
+
+// 	if !IsSupervisor(c) {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Product Image can only be added by supervisor"})
+// 		return
+// 	}
+
+// 	if !DoesProductExist(id) {
+// 		c.JSON(http.StatusNotFound, "Product does not exist")
+// 		return
+// 	}
+
+// 	form, _ := c.MultipartForm()
+// 	file := form.File["image"]
+
+// 	extension := filepath.Ext(file.Filename)
+
+// 	BookImage := models.BookImage{
+// 		URL:    "",
+// 		BookId: id,
+// 		// Book:      models.Book{},
+// 		CreatedAt: time.Now(),
+// 	}
+
+// 	models.DB.Create(&BookImage)
+// }
+
 func generateFilePath(id string, extension string) string {
 	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
 	newFileName := uuid.New().String() + extension
 
-	projectFolder, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	fmt.Println(newFileName)
+	projectFolder, err := os.Getwd()
+	// projectFolder, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	localS3Folder := projectFolder + "/locals3/"
-	imageFolder := localS3Folder + id + "/"
+	localS3Folder := filepath.ToSlash(projectFolder) + "/locals3/"
+	productImageFolder := localS3Folder + id + "/"
 
-	if _, err := os.Stat(imageFolder); os.IsNotExist(err) {
-		os.Mkdir(imageFolder, os.ModeDir)
+	fmt.Println(productImageFolder)
+
+	if _, err := os.Stat(productImageFolder); err != nil {
+		os.MkdirAll(productImageFolder, os.ModeDir)
+		fmt.Println("andar aaya")
 	}
 
-	imagePath := imageFolder + newFileName
+	imagePath := productImageFolder + newFileName
 	return imagePath
 }
+
+// type UploadedFile struct {
+// 	Status    bool
+// 	ProductID int
+// 	Filename  string
+// 	Path      string
+// 	Err       string
+// }
 
 func SaveToBucket(c *gin.Context, f *multipart.FileHeader, extension string, filename string) UploadedFile {
 	/*
@@ -284,6 +444,7 @@ func SaveToBucket(c *gin.Context, f *multipart.FileHeader, extension string, fil
 	}
 
 	filePath := generateFilePath(c.Param("id"), extension)
+	fmt.Println(filePath)
 	err := c.SaveUploadedFile(f, filePath)
 
 	if err == nil {
@@ -309,12 +470,12 @@ func UploadBookImages(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	if !IsSupervisor(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Product Image can only be added by supervisor"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Image can only be added by supervisor"})
 		return
 	}
 
 	if !DoesProductExist(id) {
-		c.JSON(http.StatusNotFound, "Product does not exist")
+		c.JSON(http.StatusNotFound, "Book does not exist")
 		return
 	}
 
@@ -323,15 +484,16 @@ func UploadBookImages(c *gin.Context) {
 
 	var SuccessfullyUploadedFiles []UploadedFile
 	var UnSuccessfullyUploadedFiles []UploadedFile
-	var BookImages []models.BookImage
+	var ProductImages []models.BookImage
 
 	for _, f := range files {
 		//save the file to specific dst
 		extension := filepath.Ext(f.Filename)
+		fmt.Println(extension)
 		uploaded_file := SaveToBucket(c, f, extension, f.Filename)
 		if uploaded_file.Status {
 			SuccessfullyUploadedFiles = append(SuccessfullyUploadedFiles, uploaded_file)
-			BookImages = append(BookImages, models.BookImage{
+			ProductImages = append(ProductImages, models.BookImage{
 				URL:       uploaded_file.Path,
 				BookId:    uploaded_file.BookId,
 				CreatedAt: time.Now(),
@@ -341,7 +503,7 @@ func UploadBookImages(c *gin.Context) {
 			UnSuccessfullyUploadedFiles = append(UnSuccessfullyUploadedFiles, uploaded_file)
 		}
 	}
-	models.DB.Create(&BookImages)
+	models.DB.Create(&ProductImages)
 
 	c.JSON(http.StatusOK, gin.H{
 		"successful": SuccessfullyUploadedFiles, "unsuccessful": UnSuccessfullyUploadedFiles,

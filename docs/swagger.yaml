@@ -239,8 +239,24 @@ paths:
       consumes:
       - application/json
       description: API Endpoint to register the user with the role of customer.
+      parameters:
+      - description: email id
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: password
+        in: formData
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: description
       summary: Login endpoint is used by the user to login.
       tags:
       - auth
@@ -249,8 +265,37 @@ paths:
       consumes:
       - application/json
       description: API Endpoint to register the user with the role of customer.
+      parameters:
+      - description: Email of the user
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: First name of the user
+        in: formData
+        name: first_name
+        required: true
+        type: string
+      - description: Last name of the user
+        in: formData
+        name: last_name
+        required: true
+        type: string
+      - description: Password of the user
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Confirm password.
+        in: formData
+        name: confirm_password
+        required: true
+        type: string
       produces:
       - application/json
+      responses:
+        "200":
+          description: ""
       summary: register endpoint is used for customer registration. ( Supervisors/admin
         can be added only by admin. )
       tags:

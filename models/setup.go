@@ -11,7 +11,7 @@ import (
 
 	//"github.com/jinzhu/gorm"
 	"github.com/go-redis/redis"
-	_ "github.com/lib/pq"
+	//_ "github.com/lib/pq"
 )
 
 var DB *gorm.DB
@@ -108,9 +108,10 @@ func ConnectDataBase() {
 	// database := fmt.Sprintf("host=localhost port=5432 user=postgres dbname=postgres password=admin sslmode=disable")
 	//database := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASSWORD)
 	settings := InitializeSettings()
-	database := "host=" + settings.DB_HOST + " user=" + settings.DB_USER + " password=" + settings.DB_PASSWORD + " dbname=" + settings.DB_NAME + " port=" + settings.DB_PORT + " sslmode=disable"
-	fmt.Println("conname is\t", database)
-	connection, err := gorm.Open(postgres.Open(database), &gorm.Config{})
+	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", settings.DB_USER, settings.DB_PASSWORD, settings.DB_HOST, settings.DB_PORT, settings.DB_NAME)
+	// database := "host=" + settings.DB_HOST + " user=" + settings.DB_USER + " password=" + settings.DB_PASSWORD + " dbname=" + settings.DB_NAME + " port=" + settings.DB_PORT + " sslmode=disable"
+	// fmt.Println("conname is\t", database)
+	connection, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 
 	if err != nil {
 		panic("Failed to connect to database!")
@@ -122,7 +123,7 @@ func ConnectDataBase() {
 	// connection.AutoMigrate(models...)
 
 	//normal migration
-	err = connection.AutoMigrate(&UserRole{}, &User{}, &Book{}, &Cart{}, &BookImage{}, &Category{})
+	err = connection.AutoMigrate(&UserRole{}, &User{}, &Book{}, &Cart{}, &BookImage{}, &Category{}, &RequestLog{}, &FailedRequestLog{})
 	if err != nil {
 		fmt.Println("error in migration: ", err)
 	}
