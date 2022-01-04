@@ -1,0 +1,12 @@
+# setup:
+#   addons:
+#     - plan: heroku-postgresql
+#       as: DATABASE
+#     config:
+#       env_file: env
+#       POSTGRES_PASSWORD: admin
+  
+# build:
+#   docker:
+#     # db: heroku-postgresql
+#     web: Dockerfile

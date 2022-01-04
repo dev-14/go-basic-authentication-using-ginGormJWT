@@ -90,15 +90,18 @@ func createInitialData() {
 		fmt.Println("user roles created successfully")
 	}
 	encryptedPassword, _ := bcrypt.GenerateFromPassword([]byte("SuperPassword@123"), 8)
+	// var test string
+	err = DB.Select("id", "first_name", "last_name", "email", "user_role_id", "password").Create(
+		&User{
+			ID:         1,
+			FirstName:  "admin",
+			LastName:   "admin",
+			Email:      "admin@gmail.com",
+			UserRoleID: 1,
+			Password:   string(encryptedPassword),
+		},
+	).Error
 
-	err = DB.Create(&User{
-		ID:         1,
-		FirstName:  "admin",
-		LastName:   "admin",
-		Email:      "admin@gmail.com",
-		UserRoleID: 1,
-		Password:   string(encryptedPassword),
-	}).Error
 	if err != nil {
 		fmt.Println("Admin already exists")
 	}

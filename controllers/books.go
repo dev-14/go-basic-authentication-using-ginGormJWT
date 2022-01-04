@@ -363,35 +363,6 @@ type UploadedFile struct {
 	Err      string
 }
 
-// func UploadBookImages(c *gin.Context) {
-
-// 	id, _ := strconv.Atoi(c.Param("id"))
-
-// 	if !IsSupervisor(c) {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Product Image can only be added by supervisor"})
-// 		return
-// 	}
-
-// 	if !DoesProductExist(id) {
-// 		c.JSON(http.StatusNotFound, "Product does not exist")
-// 		return
-// 	}
-
-// 	form, _ := c.MultipartForm()
-// 	file := form.File["image"]
-
-// 	extension := filepath.Ext(file.Filename)
-
-// 	BookImage := models.BookImage{
-// 		URL:    "",
-// 		BookId: id,
-// 		// Book:      models.Book{},
-// 		CreatedAt: time.Now(),
-// 	}
-
-// 	models.DB.Create(&BookImage)
-// }
-
 func generateFilePath(id string, extension string) string {
 	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
 	newFileName := uuid.New().String() + extension
@@ -416,14 +387,6 @@ func generateFilePath(id string, extension string) string {
 	imagePath := productImageFolder + newFileName
 	return imagePath
 }
-
-// type UploadedFile struct {
-// 	Status    bool
-// 	ProductID int
-// 	Filename  string
-// 	Path      string
-// 	Err       string
-// }
 
 func SaveToBucket(c *gin.Context, f *multipart.FileHeader, extension string, filename string) UploadedFile {
 	/*

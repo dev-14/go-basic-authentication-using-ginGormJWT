@@ -151,12 +151,12 @@ func NewRedisCache(c *gin.Context, user models.User) {
 // }
 
 func IsAdmin(c *gin.Context) bool {
-	claims := jwt.ExtractClaims(c)
-	user_email, _ := claims["email"]
+	// claims := jwt.ExtractClaims(c)
+	// user_email, _ := claims["email"]
 	var User models.User
-	//email := c.GetString("user_email")
-	// user_email, _ := models.Rdb.HGet("user", "email").Result()
-	//fmt.Println(models.Rdb.HGetAll("user"))
+	// email := c.GetString("user_email")
+	user_email, _ := models.Rdb.HGet("user", "email").Result()
+	fmt.Println(models.Rdb.HGetAll("user"))
 
 	// Check if the current user had admin role.
 	if err := models.DB.Where("email = ? AND user_role_id=1", user_email).First(&User).Error; err != nil {
