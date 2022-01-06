@@ -30,7 +30,10 @@ func main() {
 	models.ConnectDataBase() // load db
 	var router = make(chan *gin.Engine)
 	go routes.GetRouter(router)
-	var port string = os.Getenv("SERVER_PORT")
+	var port string = os.Getenv("PORT")
+	if port == "" {
+		port = "9000"
+	}
 	server_addr := fmt.Sprintf(":%s", port)
 	r := <-router
 	r.Run(server_addr)

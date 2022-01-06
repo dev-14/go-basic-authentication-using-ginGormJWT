@@ -121,7 +121,7 @@ func Register(c *gin.Context) {
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "mobile", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return
@@ -137,7 +137,7 @@ func Register(c *gin.Context) {
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "email", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return
@@ -193,9 +193,9 @@ func Login(c *gin.Context) (interface{}, error) {
 	// First check if the user exist or not...
 	if Flag == "email" {
 		models.DB.Where("email = ?", username).First(&user).Count(&count)
-		// if count == 0 {
-		// 	return nil, jwt.ErrFailedAuthentication
-		// }
+		if count == 0 {
+			return nil, jwt.ErrFailedAuthentication
+		}
 	} else if Flag == "mobile" {
 		models.DB.Where("mobile = ?", username).First(&user).Count(&count)
 		if count == 0 {
@@ -262,7 +262,7 @@ func CreateSupervisor(c *gin.Context) {
 	var Role models.UserRole
 
 	c.Request.ParseForm()
-	paramList := []string{"first_name", "last_name", "email", "password", "confirmpassword"}
+	paramList := []string{"first_name", "last_name", "username", "password", "confirmpassword"}
 
 	for _, param := range paramList {
 		if c.PostForm(param) == "" {
@@ -311,7 +311,7 @@ func CreateSupervisor(c *gin.Context) {
 		fmt.Println("err ", err.Error())
 		return
 	}
-
+	// var test string
 	flag := strings.Index(tempUser.Username, "@")
 	if flag == -1 {
 		if len(tempUser.Username) != 10 {
@@ -322,15 +322,16 @@ func CreateSupervisor(c *gin.Context) {
 		}
 
 		SanitizedUser := models.User{
-			FirstName:  tempUser.FirstName,
-			LastName:   tempUser.LastName,
-			Mobile:     tempUser.Username,
+			FirstName: tempUser.FirstName,
+			LastName:  tempUser.LastName,
+			Mobile:    tempUser.Username,
+			// Email:      test,
 			Password:   encryptedPassword,
 			UserRoleID: Role.Id, //This endpoint will be used only for customer registration.
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "mobile", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return
@@ -338,15 +339,16 @@ func CreateSupervisor(c *gin.Context) {
 	} else {
 
 		SanitizedUser := models.User{
-			FirstName:  tempUser.FirstName,
-			LastName:   tempUser.LastName,
-			Email:      tempUser.Username,
+			FirstName: tempUser.FirstName,
+			LastName:  tempUser.LastName,
+			Email:     tempUser.Username,
+			// Mobile:     test,
 			Password:   encryptedPassword,
 			UserRoleID: Role.Id, //This endpoint will be used only for customer registration.
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "email", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return
@@ -404,7 +406,7 @@ func CreateAdmin(c *gin.Context) {
 	var Role models.UserRole
 
 	c.Request.ParseForm()
-	paramList := []string{"first_name", "last_name", "email", "password", "confirmpassword"}
+	paramList := []string{"first_name", "last_name", "username", "password", "confirmpassword"}
 
 	for _, param := range paramList {
 		if c.PostForm(param) == "" {
@@ -477,7 +479,7 @@ func CreateAdmin(c *gin.Context) {
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "mobile", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return
@@ -492,7 +494,7 @@ func CreateAdmin(c *gin.Context) {
 			CreatedAt:  time.Now(),
 			IsActive:   true,
 		}
-		errs := models.DB.Create(&SanitizedUser).Error
+		errs := models.DB.Select("first_name", "last_name", "email", "password", "user_role_id", "created_at", "is_active").Create(&SanitizedUser).Error
 		if errs != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some error occoured while input to db"})
 			return

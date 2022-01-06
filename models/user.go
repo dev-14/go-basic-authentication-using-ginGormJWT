@@ -8,7 +8,7 @@ type UserRole struct {
 }
 
 type User struct {
-	ID         int    `json:"id"`
+	ID         int    `json:"id" gorm:"autoIncrement"`
 	FirstName  string `json:"firstname"`
 	LastName   string `json:"lastname"`
 	Email      string `json:"email" gorm:"unique"`
