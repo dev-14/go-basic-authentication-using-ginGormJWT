@@ -41,6 +41,14 @@ services:
       - .:/app
     command: bash -c "go build -o gingorm . && ./gingorm"
 
+  frontend:
+    stdin_open: true
+    build: 
+      dockerfile: Dockerfile
+      context: ../../react/bookstore
+    ports:
+      - 3000:3000
+
 volumes:
   pddata:
 
